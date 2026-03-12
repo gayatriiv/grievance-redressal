@@ -57,6 +57,7 @@ model Grievance {
   responses          Response[]
   attachments        Attachment[]
   notes              String?
+  isAnonymous        Boolean          @default(false)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 }

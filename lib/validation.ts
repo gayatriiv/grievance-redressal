@@ -14,6 +14,10 @@ export const grievanceSchema = z.object({
   name: optionalText,
   department: optionalText,
   rollNumber: optionalText,
+  isAnonymous: z
+    .union([z.boolean(), z.string()])
+    .transform((v) => v === true || v === "true")
+    .optional(),
   attachment: z
     .union([z.string().trim().url(), z.literal(""), z.undefined()])
     .transform((value) => (typeof value === "string" && value.trim() ? value.trim() : undefined)),

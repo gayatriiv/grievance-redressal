@@ -18,12 +18,19 @@ const grievanceUpdateSchema = z.object({
   departmentAssigned: optionalText,
 });
 
+const ANON_STUDENT = { id: "", name: "Anonymous", email: "", department: null, rollNumber: null };
+
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   const grievance = await getAccessibleGrievance(params.id, sessionUser);
   if (!grievance) return NextResponse.json({ message: "Grievance not found" }, { status: 404 });
+
+  // Mask student identity for anonymous grievances when the viewer is not the student owner
+  if (grievance.isAnonymous && sessionUser.role !== "student") {
+    return NextResponse.json({ ...grievance, student: ANON_STUDENT });
+  }
 
   return NextResponse.json(grievance);
 }

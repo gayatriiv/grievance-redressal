@@ -27,10 +27,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const isAnonymous = parsed.data.isAnonymous ?? false;
   const ai = await classifyGrievance(`${parsed.data.title}\n\n${parsed.data.description}`);
   const category = parsed.data.category || ai.category;
   const department = normalizeDepartmentName(parsed.data.department || sessionUser.department) ?? "Student Affairs";
   const departmentAssigned = resolveDepartmentAssignment(category, department);
+  // Always use session user's name for the linked account; anonymous flag controls visibility
   const studentName = parsed.data.name || sessionUser.name || "Student";
 
   const student = await prisma.user.upsert({
@@ -48,6 +50,7 @@ export async function POST(req: NextRequest) {
       summary: ai.summary,
       departmentAssigned,
       studentId: student.id,
+      isAnonymous,
       attachments: body.attachment ? { create: [{ fileUrl: body.attachment }] } : undefined
     }
   });
@@ -59,6 +62,8 @@ export async function POST(req: NextRequest) {
     departmentAssigned,
   });
 }
+
+const ANON_STUDENT = { id: "", name: "Anonymous", email: "", department: null, rollNumber: null };
 
 export async function GET(req: NextRequest) {
   const sessionUser = await getSessionUser();
@@ -101,6 +106,13 @@ export async function GET(req: NextRequest) {
     orderBy: { updatedAt: "desc" },
   });
 
-  return NextResponse.json(items);
-}
+  // Mask student identity for anonymous grievances when the viewer is not the student owner
+  const masked = items.map((item) => {
+    if (item.isAnonymous && sessionUser.role !== "student") {
+      return { ...item, student: ANON_STUDENT };
+    }
+    return item;
+  });
 
+  return NextResponse.json(masked);
+}

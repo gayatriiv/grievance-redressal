@@ -27,6 +27,7 @@ export default async function DepartmentDashboard() {
           category: true,
           status: true,
           updatedAt: true,
+          isAnonymous: true,
           student: { select: { name: true, rollNumber: true } },
         },
       })
@@ -84,7 +85,9 @@ export default async function DepartmentDashboard() {
               <div key={grievance.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background/50 p-4">
                 <div>
                   <p className="text-sm font-medium text-foreground">{grievance.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{grievance.category} · {grievance.student.name} {grievance.student.rollNumber ? `(${grievance.student.rollNumber})` : ""} · {formatGrievanceStatus(grievance.status)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {grievance.category} · {grievance.isAnonymous ? "Anonymous" : `${grievance.student.name}${grievance.student.rollNumber ? ` (${grievance.student.rollNumber})` : ""}`} · {formatGrievanceStatus(grievance.status)}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Link href={`/track/${grievance.id}`} className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition-colors hover:border-foreground/20">Track</Link>
