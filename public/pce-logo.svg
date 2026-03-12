@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="20" fill="#7a1b2d"/>
+  <text x="100" y="80" text-anchor="middle" font-family="serif" font-weight="bold" font-size="72" fill="white">P</text>
+  <text x="100" y="115" text-anchor="middle" font-family="serif" font-weight="bold" font-size="48" fill="white">c</text>
+  <text x="145" y="115" text-anchor="middle" font-family="serif" font-weight="bold" font-size="72" fill="white">E</text>
+  <line x1="30" y1="140" x2="170" y2="140" stroke="white" stroke-width="3"/>
+  <text x="100" y="162" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="14" fill="white">PILLAI COLLEGE OF</text>
+  <text x="100" y="182" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="14" fill="white">ENGINEERING</text>
+</svg>

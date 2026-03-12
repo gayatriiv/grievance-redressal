@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  student
+  admin
+  department
+}
+
+enum Urgency {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum GrievanceStatus {
+  Submitted
+  UnderReview
+  Assigned
+  InProgress
+  Resolved
+  Closed
+}
+
+model User {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  email        String      @unique
+  passwordHash String?
+  role         Role
+  department   String?
+  rollNumber   String?
+  grievances   Grievance[]
+  responses    Response[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Grievance {
+  id                 String           @id @default(auto()) @map("_id") @db.ObjectId
+  title              String
+  description        String
+  summary            String?
+  category           String
+  urgency            Urgency
+  status             GrievanceStatus  @default(Submitted)
+  departmentAssigned String
+  studentId          String           @db.ObjectId
+  student            User             @relation(fields: [studentId], references: [id])
+  responses          Response[]
+  attachments        Attachment[]
+  notes              String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Response {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  grievanceId String    @db.ObjectId
+  grievance   Grievance @relation(fields: [grievanceId], references: [id])
+  message     String
+  senderId    String    @db.ObjectId
+  sender      User      @relation(fields: [senderId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model Attachment {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  grievanceId String    @db.ObjectId
+  grievance   Grievance @relation(fields: [grievanceId], references: [id])
+  fileUrl     String
+  createdAt   DateTime  @default(now())
+}
+
+model AISetting {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  provider      String
+  encryptedKey  String
+  model         String
+  isActive      Boolean  @default(true)
+  createdById   String   @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

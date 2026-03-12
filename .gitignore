@@ -1,0 +1,13 @@
+.env
+.env.local
+.env.example
+node_modules/
+dist/
+logs/
+*.log
+.next
+next.config.js
+.DS_Store
+.vscode/
+package-lock.json
+yarn.lock
