@@ -6,6 +6,9 @@
 - batch: b1 (12-22)
 - project type: ai based grievance redressal system. 
 
+## team members
+-Shriya Jedhe, roll no:21
+
 ## overview
 this repository contains an ai-assisted grievance redressal platform for students, departments, and administrators. it supports grievance submission, automatic category and urgency classification, department routing, role-based dashboards, tracking, and analytics.
 
