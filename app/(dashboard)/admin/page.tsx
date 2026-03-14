@@ -27,6 +27,7 @@ export default async function AdminDashboard() {
       status: true,
       departmentAssigned: true,
       updatedAt: true,
+      isAnonymous: true,
       student: { select: { name: true, department: true } },
     },
   });
@@ -84,7 +85,9 @@ export default async function AdminDashboard() {
               <div key={grievance.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background/50 p-4">
                 <div>
                   <p className="text-sm font-medium text-foreground">{grievance.title}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{grievance.student.name} · {grievance.student.department || "Unknown Department"} · {grievance.departmentAssigned}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {grievance.isAnonymous ? "Anonymous" : grievance.student.name} · {grievance.isAnonymous ? "Unknown Department" : (grievance.student.department || "Unknown Department")} · {grievance.departmentAssigned}
+                  </p>
                   <p className="mt-1 text-xs text-muted-foreground">{grievance.category} · {grievance.urgency} · {formatGrievanceStatus(grievance.status)}</p>
                 </div>
                 <Link href={`/track/${grievance.id}`} className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90">Track</Link>
