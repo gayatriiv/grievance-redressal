@@ -16,6 +16,7 @@ type GrievanceDetail = {
   status: string;
   departmentAssigned: string;
   notes?: string | null;
+  isAnonymous?: boolean;
   createdAt: string;
   updatedAt: string;
   student: { name: string; email: string; department?: string | null; rollNumber?: string | null };
@@ -163,7 +164,9 @@ export const GrievanceTracker = ({ grievanceId, role }: { grievanceId: string; r
           <div className="space-y-4 rounded-2xl border border-border bg-background/50 p-5">
             <div>
               <p className="text-xs uppercase tracking-wider text-muted-foreground">Audit Trail</p>
-              <p className="mt-2 text-sm text-foreground">Submitted by {grievance.student.name}</p>
+              <p className="mt-2 text-sm text-foreground">
+                Submitted by {grievance.isAnonymous && role !== "student" ? "Anonymous Student" : grievance.student.name}
+              </p>
               <p className="mt-1 text-sm text-muted-foreground">Created {new Date(grievance.createdAt).toLocaleString()}</p>
               <p className="mt-1 text-sm text-muted-foreground">Last updated {new Date(grievance.updatedAt).toLocaleString()}</p>
             </div>
