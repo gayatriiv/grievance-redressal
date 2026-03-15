@@ -19,7 +19,7 @@ export const grievanceSchema = z.object({
     .transform((v) => v === true || v === "true")
     .optional(),
   attachment: z
-    .union([z.string().trim().url(), z.literal(""), z.undefined()])
+    .union([z.string().trim(), z.literal(""), z.undefined()])
     .transform((value) => (typeof value === "string" && value.trim() ? value.trim() : undefined)),
 });
 

@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EyeOff, Eye } from "lucide-react";
+import { EyeOff, Eye, Paperclip, X } from "lucide-react";
 
 export const GrievanceForm = ({
   defaults,
@@ -13,14 +13,39 @@ export const GrievanceForm = ({
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string[] | undefined>>({});
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
     setErrors({});
+
+    let attachmentUrl: string | undefined;
+
+    // Upload file first if one is selected
+    if (attachedFile) {
+      const uploadForm = new FormData();
+      uploadForm.append("file", attachedFile);
+      try {
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm });
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) {
+          setMessage(uploadData.message || "File upload failed");
+          setLoading(false);
+          return;
+        }
+        attachmentUrl = uploadData.url;
+      } catch {
+        setMessage("File upload failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+    }
+
     const formData = new FormData(e.currentTarget);
-    const payload = { ...Object.fromEntries(formData.entries()), isAnonymous };
+    const payload = { ...Object.fromEntries(formData.entries()), isAnonymous, attachment: attachmentUrl };
 
     try {
       const res = await fetch("/api/grievances", {
@@ -136,9 +161,43 @@ export const GrievanceForm = ({
       </div>
 
       <div>
-        <label htmlFor="g-attach" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Attachment URL <span className="font-normal">(optional)</span></label>
-        <input id="g-attach" name="attachment" placeholder="https://..." className={inputClasses} />
-        {fieldError("attachment") && <p className="mt-1 text-xs text-red-400">{fieldError("attachment")}</p>}
+        <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Attachment <span className="font-normal">(optional)</span>
+        </label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
+          className="hidden"
+          onChange={(e) => setAttachedFile(e.target.files?.[0] ?? null)}
+        />
+        {attachedFile ? (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="truncate text-sm text-foreground">{attachedFile.name}</span>
+              <span className="shrink-0 text-xs text-muted-foreground">({(attachedFile.size / 1024).toFixed(0)} KB)</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setAttachedFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+              className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Remove attachment"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background/50 px-4 py-5 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+          >
+            <Paperclip className="h-4 w-4" />
+            <span>Click to attach a file</span>
+            <span className="text-xs opacity-60">(JPEG, PNG, GIF, WebP, PDF · max 5 MB)</span>
+          </button>
+        )}
       </div>
 
       <button
