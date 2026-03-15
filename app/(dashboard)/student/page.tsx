@@ -43,12 +43,8 @@ export default async function StudentDashboard() {
 
   return (
     <main className="min-h-[calc(100vh-6rem)] bg-background">
-      <div className="mx-auto max-w-5xl space-y-8 px-6 pb-24">
+      <div className="mx-auto max-w-5xl space-y-8 px-6 pb-24 pt-3">
         <div>
-          <div className="section-label mb-4">
-            <span className="mr-2 h-1.5 w-1.5 rounded-full bg-foreground" />
-            Dashboard
-          </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Student Portal</h1>
           <p className="mt-2 text-sm text-muted-foreground">Manage your grievances and track resolutions.</p>
         </div>
