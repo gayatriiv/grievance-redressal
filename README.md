@@ -7,11 +7,10 @@
 - project type: ai based grievance redressal system. 
    
 
-## team members of project
--Shravani Jedhe, roll no:20
-
 ## team members
--Shriya Jedhe, roll no:21
+- Shravani Jedhe, roll no:20
+- Shriya Jedhe, roll no:21
+
 
 
 ## overview
