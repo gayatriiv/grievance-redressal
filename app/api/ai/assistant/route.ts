@@ -4,6 +4,25 @@ import { getSessionUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
+type AssistantRequestMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+type AssistantRequestBody = {
+  messages?: unknown[];
+  department?: string | null;
+};
+
+const isAssistantRequestMessage = (message: unknown): message is AssistantRequestMessage => {
+  if (typeof message !== "object" || message === null) {
+    return false;
+  }
+
+  const candidate = message as Partial<AssistantRequestMessage>;
+  return (candidate.role === "user" || candidate.role === "assistant") && typeof candidate.content === "string";
+};
+
 export async function POST(req: NextRequest) {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -11,15 +30,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Only students can use the complaint assistant" }, { status: 403 });
   }
 
-  const body = await req.json();
+  const body: AssistantRequestBody = await req.json();
   const messages = Array.isArray(body.messages)
     ? body.messages
-        .filter(
-          (message): message is { role: "user" | "assistant"; content: string } =>
-            message &&
-            (message.role === "user" || message.role === "assistant") &&
-            typeof message.content === "string"
-        )
+        .filter(isAssistantRequestMessage)
         .slice(-10)
     : [];
 
