@@ -35,8 +35,8 @@ export const GrievanceForm = ({
         return;
       }
 
-      setMessage("Grievance submitted. Opening tracking page...");
-      router.push(`/track/${data.id}`);
+      setMessage("Grievance submitted. Redirecting to home...");
+      router.push("/");
     } catch {
       setMessage("Network error. Please try again.");
     }
@@ -50,8 +50,8 @@ export const GrievanceForm = ({
   const fieldError = (field: string) => errors[field]?.[0];
 
   return (
-    <form onSubmit={onSubmit} className="clean-card space-y-5 p-8">
-      <div className="grid gap-5 sm:grid-cols-2">
+    <form onSubmit={onSubmit} className="clean-card space-y-7 p-10 sm:p-12">
+      <div className="grid gap-6 sm:grid-cols-2">
         <div>
           <label htmlFor="g-name" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Name</label>
           <input id="g-name" name="name" placeholder="Your full name" className={inputClasses} defaultValue={defaults?.name ?? ""} required />

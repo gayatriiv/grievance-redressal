@@ -86,7 +86,14 @@ function LoginForm() {
       <div className="border-t border-border pt-6 text-center">
         <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-foreground underline underline-offset-4 hover:opacity-80">
+          <Link
+            href={
+              callbackUrl
+                ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : "/signup"
+            }
+            className="text-foreground underline underline-offset-4 hover:opacity-80"
+          >
             Sign up
           </Link>
         </p>

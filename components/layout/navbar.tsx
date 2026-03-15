@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { Sun, Moon, LogOut } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { PillaiLogo } from "@/components/ui/pillai-logo";
 import { useTheme } from "@/components/theme-provider";
 
 export const Navbar = () => {
+  const router = useRouter();
   const { theme, toggle } = useTheme();
   const { data: session } = useSession();
 
@@ -48,7 +50,17 @@ export const Navbar = () => {
                 Dashboard
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={async () => {
+                  if (typeof window !== "undefined") {
+                    window.localStorage.setItem("appSignOut", "1");
+                  }
+                  const result = await signOut({ redirect: false, callbackUrl: "/" });
+                  if (typeof result?.url === "string") {
+                    router.push(result.url);
+                  } else {
+                    router.push("/");
+                  }
+                }}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-border transition-colors hover:border-foreground/20"
                 aria-label="Sign out"
               >
