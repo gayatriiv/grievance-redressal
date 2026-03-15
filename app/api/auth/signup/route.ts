@@ -46,7 +46,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ message: "Account created successfully" }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Signup error:", error);
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
   }
 }
