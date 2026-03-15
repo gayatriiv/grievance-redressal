@@ -85,8 +85,8 @@ export default async function PatternsPage() {
           { href: "/ai-settings", label: "AI Settings" },
         ]}
       />
-      <section className="flex-1 px-6 pb-24 pt-10 lg:px-8">
-        <div className="mx-auto max-w-6xl space-y-8">
+      <section className="flex-1 px-6 pb-24 lg:px-8">
+        <div className="mx-auto max-w-6xl space-y-8 pt-3">
           <div>
             <BackButton href="/admin" label="Back to admin dashboard" className="ml-12 lg:-ml-1" />
             <h1 className="mt-6 text-3xl font-semibold text-foreground">Grievance Pattern Analysis</h1>

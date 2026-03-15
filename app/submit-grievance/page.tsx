@@ -40,16 +40,11 @@ export default function SubmitGrievancePage() {
   return (
     <>
       <Navbar />
-      <main className="relative min-h-screen bg-background pt-20 sm:pt-24 pb-10 sm:pb-14">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" />
-        <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-8 space-y-6">
+      <main className="min-h-screen bg-background px-6 pb-24 pt-[4.75rem]">
+        <div className="mx-auto max-w-7xl space-y-6 pt-3">
           <BackButton href={user?.role === "student" ? "/student" : "/"} label="Back to dashboard" />
-          <div className="mx-auto max-w-2xl space-y-6">
+          <div className="mx-auto w-full max-w-3xl space-y-6">
             <div className="space-y-3">
-              <div className="section-label">
-                <span className="mr-2 h-1.5 w-1.5 rounded-full bg-foreground" />
-                New Complaint
-              </div>
               <h1 className="text-3xl font-bold tracking-tight leading-tight text-foreground md:text-4xl">Submit a Grievance</h1>
               <p className="text-sm leading-relaxed text-muted-foreground">Fill in the details below. AI will automatically categorize and route your complaint.</p>
             </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, MessageSquare, Search } from "lucide-react";
+import { FileText, MessageSquare, Search, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
@@ -38,11 +38,12 @@ export default async function StudentDashboard() {
     { href: "/submit-grievance", label: "Submit Grievance", desc: "File a new complaint", icon: FileText },
     { href: latestGrievance ? `/track/${latestGrievance.id}` : "/submit-grievance", label: "Track Status", desc: latestGrievance ? "Check your latest complaint progress" : "Track after your first submission", icon: Search },
     { href: latestGrievance ? `/chat?grievanceId=${latestGrievance.id}` : "/chat", label: "Chat with Department", desc: "Discuss your assigned case", icon: MessageSquare },
+    { href: "/community", label: "Support Complaints", desc: "Vote, follow, and comment on shared issues", icon: Users },
   ];
 
   return (
     <main className="min-h-[calc(100vh-6rem)] bg-background">
-      <div className="mx-auto max-w-5xl space-y-8 px-6 pb-24 pt-12">
+      <div className="mx-auto max-w-5xl space-y-8 px-6 pb-24">
         <div>
           <div className="section-label mb-4">
             <span className="mr-2 h-1.5 w-1.5 rounded-full bg-foreground" />
@@ -51,7 +52,7 @@ export default async function StudentDashboard() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Student Portal</h1>
           <p className="mt-2 text-sm text-muted-foreground">Manage your grievances and track resolutions.</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {cards.map((c) => (
             <Link key={c.label} href={c.href} className="group clean-card p-6 flex flex-col gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors group-hover:border-foreground/20">

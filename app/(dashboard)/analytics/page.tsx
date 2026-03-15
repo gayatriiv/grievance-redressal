@@ -25,8 +25,8 @@ export default async function AnalyticsPage() {
           { href: "/ai-settings", label: "AI Settings" },
         ]}
       />
-      <section className="flex-1 px-6 pb-24 pt-10 lg:px-8">
-        <div className="mx-auto max-w-6xl space-y-6">
+      <section className="flex-1 px-6 pb-24 lg:px-8">
+        <div className="mx-auto max-w-6xl space-y-6 pt-3">
           <BackButton href="/admin" label="Back to admin dashboard" className="ml-12 lg:-ml-1" />
           <h1 className="text-3xl font-semibold">Analytics Dashboard</h1>
           <AnalyticsCharts />

@@ -39,6 +39,9 @@ model User {
   rollNumber   String?
   grievances   Grievance[]
   responses    Response[]
+  grievanceVotes    GrievanceVote[]
+  grievanceFollows  GrievanceFollow[]
+  grievanceComments GrievanceComment[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -56,6 +59,9 @@ model Grievance {
   student            User             @relation(fields: [studentId], references: [id])
   responses          Response[]
   attachments        Attachment[]
+  votes              GrievanceVote[]
+  follows            GrievanceFollow[]
+  comments           GrievanceComment[]
   notes              String?
   isAnonymous        Boolean          @default(false)
   createdAt          DateTime         @default(now())
@@ -78,6 +84,41 @@ model Attachment {
   grievance   Grievance @relation(fields: [grievanceId], references: [id])
   fileUrl     String
   createdAt   DateTime  @default(now())
+}
+
+model GrievanceVote {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  grievanceId String    @db.ObjectId
+  grievance   Grievance @relation(fields: [grievanceId], references: [id])
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  value       Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([grievanceId, userId])
+}
+
+model GrievanceFollow {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  grievanceId String    @db.ObjectId
+  grievance   Grievance @relation(fields: [grievanceId], references: [id])
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@unique([grievanceId, userId])
+}
+
+model GrievanceComment {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  grievanceId String    @db.ObjectId
+  grievance   Grievance @relation(fields: [grievanceId], references: [id])
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  message     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model AISetting {

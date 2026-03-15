@@ -14,8 +14,8 @@ export default async function TrackPage({ params }: { params: { id: string } }) 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background px-6 pb-24 pt-28">
-        <div className="mx-auto max-w-6xl space-y-6">
+      <main className="min-h-screen bg-background px-6 pb-24 pt-[4.75rem]">
+        <div className="mx-auto max-w-7xl space-y-6 pt-3">
           <BackButton href={getDashboardPathForRole(sessionUser.role)} label="Back to dashboard" />
           <GrievanceTracker grievanceId={params.id} role={sessionUser.role} />
         </div>

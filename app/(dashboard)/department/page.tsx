@@ -28,6 +28,9 @@ export default async function DepartmentDashboard() {
           status: true,
           updatedAt: true,
           isAnonymous: true,
+          votes: { select: { value: true } },
+          follows: { select: { id: true } },
+          comments: { select: { id: true } },
           student: { select: { name: true, rollNumber: true } },
         },
       })
@@ -39,7 +42,7 @@ export default async function DepartmentDashboard() {
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
       <Sidebar items={[{ href: "/department", label: "Assigned Cases" }, { href: "/department/chat", label: "Student Chat" }]} />
-      <section className="flex-1 space-y-6 p-8">
+      <section className="flex-1 space-y-6 px-8 pb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Department Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage assigned cases for {department || "your department"} and respond to students.</p>
@@ -84,6 +87,9 @@ export default async function DepartmentDashboard() {
             {grievances.map((grievance) => (
               <div key={grievance.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background/50 p-4">
                 <div>
+                  <p className="mb-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Support {(grievance.votes.filter((vote) => vote.value > 0).length - grievance.votes.filter((vote) => vote.value < 0).length)} · {grievance.follows.length} following · {grievance.comments.length} comments
+                  </p>
                   <p className="text-sm font-medium text-foreground">{grievance.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {grievance.category} · {grievance.isAnonymous ? "Anonymous" : `${grievance.student.name}${grievance.student.rollNumber ? ` (${grievance.student.rollNumber})` : ""}`} · {formatGrievanceStatus(grievance.status)}

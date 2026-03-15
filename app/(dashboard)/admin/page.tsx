@@ -28,6 +28,9 @@ export default async function AdminDashboard() {
       departmentAssigned: true,
       updatedAt: true,
       isAnonymous: true,
+      votes: { select: { value: true } },
+      follows: { select: { id: true } },
+      comments: { select: { id: true } },
       student: { select: { name: true, department: true } },
     },
   });
@@ -46,7 +49,7 @@ export default async function AdminDashboard() {
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
       <Sidebar items={[{ href: "/admin", label: "All Grievances" }, { href: "/analytics", label: "Analytics" }, { href: "/patterns", label: "Patterns" }, { href: "/ai-settings", label: "AI Settings" }]} />
-      <section className="flex-1 space-y-6 p-8">
+      <section className="flex-1 space-y-6 px-8 pb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">Overview of all grievances, pattern analysis, and accountability metrics.</p>
@@ -84,6 +87,9 @@ export default async function AdminDashboard() {
             {grievances.map((grievance) => (
               <div key={grievance.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background/50 p-4">
                 <div>
+                  <p className="mb-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    Support {(grievance.votes.filter((vote) => vote.value > 0).length - grievance.votes.filter((vote) => vote.value < 0).length)} · {grievance.follows.length} following · {grievance.comments.length} comments
+                  </p>
                   <p className="text-sm font-medium text-foreground">{grievance.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {grievance.isAnonymous ? "Anonymous" : grievance.student.name} · {grievance.isAnonymous ? "Unknown Department" : (grievance.student.department || "Unknown Department")} · {grievance.departmentAssigned}

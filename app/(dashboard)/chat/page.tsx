@@ -29,22 +29,20 @@ export default async function StudentChatPage({ searchParams }: { searchParams?:
   });
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-6rem)] max-w-6xl space-y-6 px-6 pb-24 pt-12">
-      <BackButton href="/student" label="Back to dashboard" />
-      <div>
-        <div className="section-label mb-4">
-          <span className="mr-2 h-1.5 w-1.5 rounded-full bg-foreground" />
-          Student Chat
+    <main className="min-h-[calc(100vh-6rem)] bg-background px-6 pb-24">
+      <div className="mx-auto max-w-7xl space-y-6 pt-3">
+        <BackButton href="/student" label="Back to dashboard" />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Chat with Assigned Department</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Ask for updates, share additional context, and keep a transparent record of the resolution process.</p>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Chat with Assigned Department</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Ask for updates, share additional context, and keep a transparent record of the resolution process.</p>
+        <GrievanceChat
+          grievances={grievances.map((grievance) => ({ ...grievance, updatedAt: grievance.updatedAt.toISOString() }))}
+          role="student"
+          defaultGrievanceId={searchParams?.grievanceId}
+          emptyMessage="No grievances have been filed yet. Submit a grievance first to start a conversation with the assigned department."
+        />
       </div>
-      <GrievanceChat
-        grievances={grievances.map((grievance) => ({ ...grievance, updatedAt: grievance.updatedAt.toISOString() }))}
-        role="student"
-        defaultGrievanceId={searchParams?.grievanceId}
-        emptyMessage="No grievances have been filed yet. Submit a grievance first to start a conversation with the assigned department."
-      />
     </main>
   );
 }

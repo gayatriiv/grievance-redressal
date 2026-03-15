@@ -35,7 +35,7 @@ export default async function DepartmentChatPage({ searchParams }: { searchParam
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
       <Sidebar items={[{ href: "/department", label: "Assigned Cases" }, { href: "/department/chat", label: "Student Chat" }]} />
-      <section className="flex-1 space-y-6 p-8">
+      <section className="flex-1 space-y-6 px-8 pb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Department Conversations</h1>
           <p className="mt-1 text-sm text-muted-foreground">Update case status, answer students, and keep the grievance trail current.</p>
