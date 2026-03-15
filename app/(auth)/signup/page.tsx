@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
@@ -12,7 +12,7 @@ const detectEmailKind = (email: string) => {
   return "invalid";
 };
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "";
@@ -131,5 +131,12 @@ export default function SignupPage() {
       </div>
       </div>
     </main>
+  );
+}
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   );
 }
