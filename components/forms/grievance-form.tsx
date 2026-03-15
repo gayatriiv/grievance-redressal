@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
 import { grievanceCategories } from "@/lib/utils";
+import { DuplicateComplaints } from "@/components/forms/duplicate-complaints";
 
 type FormFields = {
   name: string;
@@ -29,6 +30,22 @@ type AssistantDraft = {
   readyToSubmit: boolean;
 };
 
+type SimilarGrievance = {
+  id: string;
+  title: string;
+  description: string;
+  summary: string | null;
+  category: string;
+  status: string;
+  urgency: string;
+  departmentAssigned: string;
+  createdAt: string;
+  upvotes: number;
+  followerCount: number;
+  similarityScore: number;
+  similarityReason: string;
+};
+
 export const GrievanceForm = ({
   defaults,
 }: {
@@ -44,6 +61,11 @@ export const GrievanceForm = ({
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [assistantInput, setAssistantInput] = useState("");
   const [assistantDraft, setAssistantDraft] = useState<AssistantDraft | null>(null);
+  const [duplicates, setDuplicates] = useState<SimilarGrievance[]>([]);
+  const [duplicatesChecked, setDuplicatesChecked] = useState(false);
+  const [duplicatesDismissed, setDuplicatesDismissed] = useState(false);
+  const [duplicatesLoading, setDuplicatesLoading] = useState(false);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
   const [assistantMessages, setAssistantMessages] = useState<AssistantMessage[]>([
     {
       role: "assistant",
@@ -61,6 +83,7 @@ export const GrievanceForm = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const assistantInputRef = useRef<HTMLTextAreaElement>(null);
   const assistantMessagesRef = useRef<HTMLDivElement>(null);
+  const duplicateCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const inputClasses =
     "w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-foreground/20 placeholder:text-muted-foreground/40";
@@ -79,6 +102,89 @@ export const GrievanceForm = ({
 
   const setField = (field: keyof FormFields, value: string) => {
     setFields((current) => ({ ...current, [field]: value }));
+    // Reset duplicates when user changes title or description
+    if (field === "title" || field === "description") {
+      setDuplicatesChecked(false);
+      setDuplicatesDismissed(false);
+    }
+  };
+
+  // Debounced duplicate check
+  const checkForDuplicates = useCallback(async (title: string, description: string, category: string) => {
+    if (title.trim().length < 3 || description.trim().length < 15) return;
+
+    setDuplicatesLoading(true);
+    try {
+      const res = await fetch("/api/grievances/check-duplicates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title.trim(), description: description.trim(), category: category || undefined }),
+      });
+      const data = await res.json();
+      if (res.ok && data.duplicates?.length > 0) {
+        setDuplicates(data.duplicates);
+      } else {
+        setDuplicates([]);
+      }
+    } catch {
+      setDuplicates([]);
+    } finally {
+      setDuplicatesLoading(false);
+      setDuplicatesChecked(true);
+    }
+  }, []);
+
+  // Trigger duplicate check when title+description are sufficiently filled
+  useEffect(() => {
+    if (duplicatesDismissed) return;
+    if (fields.title.trim().length < 3 || fields.description.trim().length < 15) {
+      setDuplicates([]);
+      setDuplicatesChecked(false);
+      return;
+    }
+
+    if (duplicateCheckTimer.current) {
+      clearTimeout(duplicateCheckTimer.current);
+    }
+
+    duplicateCheckTimer.current = setTimeout(() => {
+      void checkForDuplicates(fields.title, fields.description, fields.category);
+    }, 1500);
+
+    return () => {
+      if (duplicateCheckTimer.current) {
+        clearTimeout(duplicateCheckTimer.current);
+      }
+    };
+  }, [fields.title, fields.description, fields.category, duplicatesDismissed, checkForDuplicates]);
+
+  // "Join" an existing complaint: upvote + follow
+  const handleJoinComplaint = async (grievanceId: string) => {
+    setJoiningId(grievanceId);
+    try {
+      // Upvote the complaint
+      await fetch(`/api/community/grievances/${grievanceId}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: 1 }),
+      });
+
+      // Follow the complaint
+      await fetch(`/api/community/grievances/${grievanceId}/follow`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ following: true }),
+      });
+
+      setMessage("You have joined the existing complaint. Upvoted and following! Redirecting...");
+      setTimeout(() => {
+        router.push("/community");
+      }, 1500);
+    } catch {
+      setMessage("Failed to join complaint. Please try again.");
+    } finally {
+      setJoiningId(null);
+    }
   };
 
   useEffect(() => {
@@ -144,6 +250,43 @@ export const GrievanceForm = ({
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Block submission if duplicates are detected and not yet dismissed
+    if (!duplicatesDismissed && duplicates.length > 0) {
+      setMessage("Please review the similar complaints above. Join an existing one or dismiss to continue.");
+      return;
+    }
+
+    // If we haven't checked for duplicates yet, do it now before submitting
+    if (!duplicatesChecked && !duplicatesDismissed && fields.title.trim().length >= 3 && fields.description.trim().length >= 15) {
+      setLoading(true);
+      setMessage("");
+      try {
+        const res = await fetch("/api/grievances/check-duplicates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: fields.title.trim(),
+            description: fields.description.trim(),
+            category: fields.category || undefined,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.duplicates?.length > 0) {
+          setDuplicates(data.duplicates);
+          setDuplicatesChecked(true);
+          setMessage("Similar complaints found. Please review them before submitting.");
+          setLoading(false);
+          return;
+        }
+        setDuplicatesChecked(true);
+      } catch {
+        // If the check fails, allow submission to proceed
+        setDuplicatesChecked(true);
+      }
+      setLoading(false);
+    }
+
     setLoading(true);
     setMessage("");
     setErrors({});
@@ -280,7 +423,26 @@ export const GrievanceForm = ({
         <label htmlFor="g-desc" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Description</label>
         <textarea id="g-desc" name="description" rows={5} minLength={15} placeholder="Describe your grievance in detail (min 15 characters)" className={inputClasses + " resize-none"} value={fields.description} onChange={(e) => setField("description", e.target.value)} required />
         {fieldError("description") && <p className="mt-1 text-xs text-red-400">{fieldError("description")}</p>}
+        {duplicatesLoading && (
+          <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Checking for similar complaints...
+          </div>
+        )}
       </div>
+
+      {/* Duplicate detection panel */}
+      {!duplicatesDismissed && duplicates.length > 0 && (
+        <DuplicateComplaints
+          duplicates={duplicates}
+          onJoin={handleJoinComplaint}
+          onDismiss={() => {
+            setDuplicatesDismissed(true);
+            setDuplicates([]);
+          }}
+          joining={joiningId}
+        />
+      )}
 
       <div>
         <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -327,10 +489,16 @@ export const GrievanceForm = ({
 
       <button
         type="submit"
-        disabled={loading || assistantLoading}
+        disabled={loading || assistantLoading || joiningId !== null || (!duplicatesDismissed && duplicates.length > 0)}
         className="w-full rounded-lg bg-foreground px-6 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Submitting..." : isAnonymous ? "Submit Anonymously" : "Submit Grievance"}
+        {loading
+          ? "Submitting..."
+          : !duplicatesDismissed && duplicates.length > 0
+            ? "Review duplicates above before submitting"
+            : isAnonymous
+              ? "Submit Anonymously"
+              : "Submit Grievance"}
       </button>
 
       {message && (
