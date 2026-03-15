@@ -37,8 +37,8 @@ export const GrievanceForm = ({
         return;
       }
 
-      setMessage("Grievance submitted. Opening tracking page...");
-      router.push(`/track/${data.id}`);
+      setMessage("Grievance submitted. Redirecting to home...");
+      router.push("/");
     } catch {
       setMessage("Network error. Please try again.");
     }

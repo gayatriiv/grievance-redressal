@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 
 const detectEmailKind = (email: string) => {
@@ -14,6 +14,8 @@ const detectEmailKind = (email: string) => {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "";
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,10 @@ export default function SignupPage() {
         setLoading(false);
         return;
       }
-      router.push("/login?registered=true");
+      const loginUrl = `/login?registered=true${
+        callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+      }`;
+      router.push(loginUrl);
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);
