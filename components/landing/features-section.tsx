@@ -1,12 +1,13 @@
-﻿"use client";
+"use client";
 
 import { SectionWrapper } from "./section-wrapper";
 import {
   Sparkles,
   GitBranch,
   Activity,
-  TrendingUp,
+    TrendingUp,
   Shield,
+  BarChart,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -46,7 +47,59 @@ const features: { icon: LucideIcon; title: string; description: string; num: str
     description:
       "Ensures clear communication and accountability between students and administration.",
   },
+  {
+    icon: BarChart,
+    num: "/ 06",
+    title: "Data-Driven Insights",
+    description:
+      "Comprehensive analytics dashboard for administrators to monitor resolution times and department performance.",
+  },
 ];
+
+import { useRef, useState } from "react";
+
+const FeatureCard = ({ f }: { f: { icon: LucideIcon; title: string; description: string; num: string } }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      className="relative bg-card p-8 transition-colors group overflow-hidden border-border"
+    >
+      {/* Glare effect */}
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 dark:mix-blend-lighten"
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.08), transparent 40%)`,
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 light:mix-blend-darken dark:hidden"
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 0, 0, 0.03), transparent 40%)`,
+        }}
+      />
+      
+      <div className="relative z-10 transition-transform duration-500 group-hover:translate-x-1">
+        <div className="flex items-center justify-between mb-6">
+          <f.icon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors duration-500" />
+          <span className="text-xs font-medium text-muted-foreground tracking-wider group-hover:text-foreground transition-colors duration-500">{f.num}</span>
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2 transition-colors duration-500">{f.title}</h3>
+        <p className="text-sm leading-relaxed text-muted-foreground group-hover:text-foreground/80 transition-colors duration-500">{f.description}</p>
+      </div>
+    </div>
+  );
+};
 
 export const FeaturesSection = () => (
   <SectionWrapper id="features">
@@ -58,19 +111,9 @@ export const FeaturesSection = () => (
       </h2>
     </div>
 
-    <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-border">
+    <div className="grid gap-px bg-white/5 md:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-white/10">
       {features.map((f) => (
-        <div
-          key={f.title}
-          className="bg-background p-8 transition-colors hover:bg-card group"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <f.icon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-            <span className="text-xs font-medium text-muted-foreground tracking-wider">{f.num}</span>
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">{f.title}</h3>
-          <p className="text-sm leading-relaxed text-muted-foreground">{f.description}</p>
-        </div>
+        <FeatureCard key={f.title} f={f} />
       ))}
     </div>
   </SectionWrapper>

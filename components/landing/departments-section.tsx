@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { useRef, useState } from "react";
 import { SectionWrapper } from "./section-wrapper";
 import {
   GraduationCap,
@@ -20,6 +21,55 @@ const departments: { icon: LucideIcon; name: string; desc: string }[] = [
   { icon: Settings, name: "Administration", desc: "General administration and student services" },
 ];
 
+const DepartmentCard = ({ d }: { d: { icon: LucideIcon; name: string; desc: string } }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setMousePosition({ x, y });
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      className="relative flex items-center gap-4 p-6 rounded-2xl border border-border bg-card overflow-hidden group transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl"
+    >
+      {/* Interactive hover spotlight */}
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 dark:mix-blend-lighten"
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.08), transparent 40%)`,
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 light:mix-blend-darken dark:hidden"
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 0, 0, 0.03), transparent 40%)`,
+        }}
+      />
+      
+      <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-background transition-all duration-500 group-hover:scale-110 group-hover:border-foreground/20 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+        <d.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors duration-500" />
+      </div>
+      
+      <div className="relative z-10">
+        <h3 className="text-sm font-semibold text-foreground group-hover:text-foreground transition-colors duration-500">
+          {d.name}
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1 transition-colors duration-500 group-hover:text-foreground/80">
+          {d.desc}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 export const DepartmentsSection = () => (
   <SectionWrapper id="departments">
     <div className="mb-16">
@@ -32,18 +82,7 @@ export const DepartmentsSection = () => (
 
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {departments.map((d) => (
-        <div
-          key={d.name}
-          className="clean-card flex items-center gap-4 p-6 group"
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border">
-            <d.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">{d.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{d.desc}</p>
-          </div>
-        </div>
+        <DepartmentCard key={d.name} d={d} />
       ))}
     </div>
   </SectionWrapper>

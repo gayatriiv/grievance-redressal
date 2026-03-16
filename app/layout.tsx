@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LenisProvider } from "@/components/lenis-provider";
 
 export const metadata: Metadata = {
   title: "AI Based Grievance Redressal System – Pillai College of Engineering",
@@ -11,7 +12,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <LenisProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </LenisProvider>
       </body>
     </html>
   );

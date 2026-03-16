@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 const stats = [
   { value: "1,200+", label: "grievances processed" },

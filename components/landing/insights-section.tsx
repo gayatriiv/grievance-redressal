@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { SectionWrapper } from "./section-wrapper";
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { SectionWrapper } from "./section-wrapper";
 
@@ -11,6 +11,50 @@ const stack = [
   { label: "Deployment", tech: "Cloud Ready", iconPath: "M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" },
 ];
 
+import { useRef, useState } from "react";
+
+const TechCard = ({ s }: { s: { label: string; tech: string; iconPath: string } }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      className="relative bg-card p-8 text-center group overflow-hidden border-border"
+    >
+      {/* Glare effect */}
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 dark:mix-blend-lighten"
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.08), transparent 40%)`,
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 light:mix-blend-darken dark:hidden"
+        style={{
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 0, 0, 0.03), transparent 40%)`,
+        }}
+      />
+      
+      <div className="relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
+        <svg className="mx-auto h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors duration-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d={s.iconPath} />
+        </svg>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1 group-hover:text-foreground/80 transition-colors duration-500">{s.label}</p>
+        <p className="text-sm font-semibold text-foreground group-hover:text-foreground transition-colors duration-500">{s.tech}</p>
+      </div>
+    </div>
+  );
+};
+
 export const TechStackSection = () => (
   <SectionWrapper id="tech">
     <div className="mb-16">
@@ -21,15 +65,9 @@ export const TechStackSection = () => (
       </h2>
     </div>
 
-    <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-border">
+    <div className="grid gap-px bg-white/5 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-white/10">
       {stack.map((s) => (
-        <div key={s.label} className="bg-background p-8 text-center group transition-colors hover:bg-card">
-          <svg className="mx-auto h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d={s.iconPath} />
-          </svg>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">{s.label}</p>
-          <p className="text-sm font-semibold text-foreground">{s.tech}</p>
-        </div>
+        <TechCard key={s.label} s={s} />
       ))}
     </div>
   </SectionWrapper>
