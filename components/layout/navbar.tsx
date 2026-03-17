@@ -5,6 +5,7 @@ import { Sun, Moon, LogOut } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { PillaiLogo } from "@/components/ui/pillai-logo";
 import { useTheme } from "@/components/theme-provider";
 
@@ -12,6 +13,11 @@ export const Navbar = () => {
   const router = useRouter();
   const { theme, toggle } = useTheme();
   const { data: session } = useSession();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const dashboardHref =
     session?.user && (session.user as any).role === "admin"
@@ -35,22 +41,26 @@ export const Navbar = () => {
             className="flex h-9 w-9 items-center justify-center rounded-full border border-border transition-colors hover:border-foreground/20 relative overflow-hidden"
             aria-label="Toggle theme"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={theme === "dark" ? "dark" : "light"}
-                initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className="absolute"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Moon className="h-4 w-4 text-muted-foreground" />
-                )}
-              </motion.div>
-            </AnimatePresence>
+            {mounted ? (
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={theme === "dark" ? "dark" : "light"}
+                  initial={{ scale: 0.5, opacity: 0, rotate: -90 }}
+                  animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                  exit={{ scale: 0.5, opacity: 0, rotate: 90 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="absolute"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Moon className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            ) : (
+              <span className="h-4 w-4" />
+            )}
           </button>
 
           {session?.user ? (
