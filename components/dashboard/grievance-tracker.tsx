@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Loader2, MessageSquare, RefreshCw } from "lucide-react";
 import { StatusTimeline } from "@/components/dashboard/status-timeline";
+import { FeedbackRating } from "@/components/dashboard/feedback-rating";
 import { formatGrievanceStatus } from "@/lib/utils";
 
 type GrievanceDetail = {
@@ -188,6 +189,13 @@ export const GrievanceTracker = ({ grievanceId, role }: { grievanceId: string; r
           </div>
         </div>
       </div>
+
+      {/* Feedback & Rating section — visible when grievance is resolved/closed */}
+      <FeedbackRating
+        grievanceId={grievanceId}
+        status={grievance.status}
+        role={role}
+      />
     </div>
   );
 };

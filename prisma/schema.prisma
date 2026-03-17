@@ -42,6 +42,7 @@ model User {
   grievanceVotes    GrievanceVote[]
   grievanceFollows  GrievanceFollow[]
   grievanceComments GrievanceComment[]
+  feedbacks    Feedback[]
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
@@ -62,10 +63,25 @@ model Grievance {
   votes              GrievanceVote[]
   follows            GrievanceFollow[]
   comments           GrievanceComment[]
+  feedback           Feedback?
   notes              String?
   isAnonymous        Boolean          @default(false)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+}
+
+model Feedback {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  grievanceId String    @db.ObjectId
+  grievance   Grievance @relation(fields: [grievanceId], references: [id])
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  rating      Int
+  comment     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([grievanceId])
 }
 
 model Response {
