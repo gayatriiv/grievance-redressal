@@ -100,3 +100,16 @@ html {
 .section-label {
   @apply inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-muted-foreground;
 }
+
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-bg {
+  background: linear-gradient(270deg, #4f46e5, #ec4899, #3b82f6);
+  background-size: 600% 600%;
+  animation: gradientShift 15s ease infinite;
+}

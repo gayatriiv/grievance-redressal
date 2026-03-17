@@ -40,7 +40,7 @@ export default function SubmitGrievancePage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background px-6 pb-24 pt-[4.75rem]">
+      <main className="min-h-screen px-6 pb-24 pt-[4.75rem] animate-gradient-bg">
         <div className="mx-auto max-w-7xl space-y-6 pt-3">
           <BackButton href={user?.role === "student" ? "/student" : "/"} label="Back to dashboard" />
           <div className="mx-auto w-full max-w-3xl space-y-6">
