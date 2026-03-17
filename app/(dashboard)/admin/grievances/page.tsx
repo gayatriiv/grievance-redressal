@@ -32,7 +32,7 @@ export default async function AdminGrievancesPage() {
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
-      <Sidebar items={adminSidebarItems} />
+      <Sidebar items={[...adminSidebarItems]} />
       <section className="flex-1 px-6 pb-10 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-6 pt-3">
           <BackButton href="/admin" label="Back to overview" className="ml-12 lg:-ml-1" />
