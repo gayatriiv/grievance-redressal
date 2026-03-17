@@ -41,6 +41,7 @@ const statusLabels: Record<string, string> = {
   UnderReview: "Under Review",
   Assigned: "Assigned",
   InProgress: "In Progress",
+  Escalated: "Escalated",
   Resolved: "Resolved",
   Closed: "Closed",
 };

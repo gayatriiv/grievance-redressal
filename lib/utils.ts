@@ -13,13 +13,17 @@ export const grievanceCategories = [
   "Other",
 ] as const;
 
-export const grievanceStatusValues = ["Submitted", "UnderReview", "Assigned", "InProgress", "Resolved", "Closed"] as const;
+export const grievanceStatusValues = ["Submitted", "UnderReview", "Assigned", "InProgress", "Escalated", "Resolved", "Closed"] as const;
+
+export const ESCALATION_WINDOW_HOURS = 72;
+export const ESCALATION_TARGET = "Administrator";
 
 const grievanceStatusLabels: Record<(typeof grievanceStatusValues)[number], string> = {
   Submitted: "Submitted",
   UnderReview: "Under Review",
   Assigned: "Assigned",
   InProgress: "In Progress",
+  Escalated: "Escalated",
   Resolved: "Resolved",
   Closed: "Closed",
 };
@@ -59,6 +63,14 @@ export const formatGrievanceStatus = (status?: string | null) => {
   const normalizedStatus = status.replace(/\s+/g, "") as (typeof grievanceStatusValues)[number];
   return grievanceStatusLabels[normalizedStatus] ?? status.replace(/([a-z])([A-Z])/g, "$1 $2");
 };
+
+export const getEscalationDeadline = (createdAt: Date | string) => {
+  const createdAtDate = typeof createdAt === "string" ? new Date(createdAt) : createdAt;
+  return new Date(createdAtDate.getTime() + ESCALATION_WINDOW_HOURS * 60 * 60 * 1000);
+};
+
+export const isResolvedGrievanceStatus = (status?: string | null) =>
+  status === "Resolved" || status === "Closed";
 
 export const categoryDepartmentMap: Record<string, string> = {
   "Academic Issues": "Academic Office",

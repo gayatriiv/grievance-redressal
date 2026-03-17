@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { formatGrievanceStatus, getDashboardPathForRole, normalizeDepartmentName } from "@/lib/utils";
@@ -15,6 +16,8 @@ export default async function DepartmentDashboard() {
     redirect(getDashboardPathForRole(sessionUser.role));
   }
 
+  await autoEscalateOverdueGrievances();
+
   const department = normalizeDepartmentName(sessionUser.department);
   const grievances = department
     ? await prisma.grievance.findMany({
@@ -26,6 +29,7 @@ export default async function DepartmentDashboard() {
           title: true,
           category: true,
           status: true,
+          escalatedAt: true,
           updatedAt: true,
           isAnonymous: true,
           votes: { select: { value: true } },
@@ -38,6 +42,7 @@ export default async function DepartmentDashboard() {
 
   const inProgress = grievances.filter((grievance) => ["Assigned", "InProgress", "UnderReview"].includes(grievance.status)).length;
   const resolved = grievances.filter((grievance) => grievance.status === "Resolved" || grievance.status === "Closed").length;
+  const escalated = grievances.filter((grievance) => grievance.escalatedAt).length;
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
@@ -58,7 +63,7 @@ export default async function DepartmentDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <div className="clean-card p-5">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Assigned Cases</p>
             <p className="mt-2 text-2xl font-semibold text-foreground">{grievances.length}</p>
@@ -70,6 +75,10 @@ export default async function DepartmentDashboard() {
           <div className="clean-card p-5">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Resolved</p>
             <p className="mt-2 text-2xl font-semibold text-foreground">{resolved}</p>
+          </div>
+          <div className="clean-card p-5">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Escalated</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">{escalated}</p>
           </div>
         </div>
 
@@ -94,6 +103,11 @@ export default async function DepartmentDashboard() {
                   <p className="mt-1 text-xs text-muted-foreground">
                     {grievance.category} · {grievance.isAnonymous ? "Anonymous" : `${grievance.student.name}${grievance.student.rollNumber ? ` (${grievance.student.rollNumber})` : ""}`} · {formatGrievanceStatus(grievance.status)}
                   </p>
+                  {grievance.escalatedAt && (
+                    <p className="mt-2 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+                      Escalated to admin oversight
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <Link href={`/track/${grievance.id}`} className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition-colors hover:border-foreground/20">Track</Link>
