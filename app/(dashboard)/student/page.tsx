@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LayoutDashboard, User, ListChecks, FileText, MessageSquare, Users } from "lucide-react";
 import { redirect } from "next/navigation";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { formatGrievanceStatus, getDashboardPathForRole } from "@/lib/utils";
@@ -16,6 +17,8 @@ export default async function StudentDashboard() {
     redirect(getDashboardPathForRole(sessionUser.role));
   }
 
+  await autoEscalateOverdueGrievances();
+
   const grievances = await prisma.grievance.findMany({
     where: { studentId: sessionUser.id },
     orderBy: { updatedAt: "desc" },
@@ -26,6 +29,7 @@ export default async function StudentDashboard() {
       status: true,
       category: true,
       departmentAssigned: true,
+      escalatedAt: true,
       updatedAt: true,
     },
   });
@@ -42,6 +46,7 @@ export default async function StudentDashboard() {
     (grievance) => grievance.status === "Resolved" || grievance.status === "Closed",
   ).length;
   const open = total - resolved;
+  const escalated = grievances.filter((grievance) => grievance.escalatedAt).length;
   const latestGrievance = grievances[0];
 
   const systemTotal = allGrievancesForStats.length;
@@ -158,6 +163,11 @@ export default async function StudentDashboard() {
                 <div>
                   <p className="text-sm font-medium text-foreground">{grievance.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">{grievance.category} · {grievance.departmentAssigned} · {formatGrievanceStatus(grievance.status)}</p>
+                  {grievance.escalatedAt && (
+                    <p className="mt-2 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+                      Escalated for higher review
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <Link href={`/track/${grievance.id}`} className="rounded-full border border-border px-4 py-2 text-sm text-foreground transition-colors hover:border-foreground/20">Track</Link>

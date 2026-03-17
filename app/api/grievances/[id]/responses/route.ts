@@ -36,7 +36,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       ? grievance.status === "Submitted"
         ? "UnderReview"
         : grievance.status
-      : grievance.status === "Submitted" || grievance.status === "UnderReview" || grievance.status === "Assigned"
+      : grievance.status === "Submitted" ||
+          grievance.status === "UnderReview" ||
+          grievance.status === "Assigned" ||
+          grievance.status === "Escalated"
         ? "InProgress"
         : grievance.status;
 

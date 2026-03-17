@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { GrievanceChat } from "@/components/dashboard/grievance-chat";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { getDashboardPathForRole } from "@/lib/utils";
@@ -15,6 +16,8 @@ export default async function StudentChatPage({ searchParams }: { searchParams?:
   if (sessionUser.role !== "student") {
     redirect(getDashboardPathForRole(sessionUser.role));
   }
+
+  await autoEscalateOverdueGrievances();
 
   const grievances = await prisma.grievance.findMany({
     where: { studentId: sessionUser.id },

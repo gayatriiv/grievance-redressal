@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { formatGrievanceStatus } from "@/lib/utils";
@@ -10,6 +11,8 @@ export async function GET() {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   if (sessionUser.role !== "admin") return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+
+  await autoEscalateOverdueGrievances();
 
   const grievances = await prisma.grievance.findMany({
     select: {

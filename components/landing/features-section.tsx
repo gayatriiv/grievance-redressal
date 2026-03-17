@@ -5,9 +5,11 @@ import {
   Sparkles,
   GitBranch,
   Activity,
-    TrendingUp,
+  TrendingUp,
   Shield,
   BarChart,
+  StarHalf,
+  MessageSquareText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -41,15 +43,22 @@ const features: { icon: LucideIcon; title: string; description: string; num: str
       "Identifies recurring issues across departments to help the institution take preventive action.",
   },
   {
-    icon: Shield,
+    icon: StarHalf,
     num: "/ 05",
-    title: "Transparency & Accountability",
+    title: "Feedback & Rating System",
     description:
-      "Ensures clear communication and accountability between students and administration.",
+      "After a complaint is resolved, students can rate the resolution process and provide feedback on service quality.",
+  },
+  {
+    icon: MessageSquareText,
+    num: "/ 06",
+    title: "AI Complaint Assistant",
+    description:
+      "An intelligent chatbot that helps students draft, refine, and submit complaints with guided prompts and smart suggestions.",
   },
   {
     icon: BarChart,
-    num: "/ 06",
+    num: "/ 07",
     title: "Data-Driven Insights",
     description:
       "Comprehensive analytics dashboard for administrators to monitor resolution times and department performance.",
