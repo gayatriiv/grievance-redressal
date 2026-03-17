@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { SectionWrapper } from "./section-wrapper";
 import {
@@ -7,6 +7,7 @@ import {
   Activity,
   TrendingUp,
   Shield,
+  MessageSquareText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -45,6 +46,13 @@ const features: { icon: LucideIcon; title: string; description: string; num: str
     title: "Transparency & Accountability",
     description:
       "Ensures clear communication and accountability between students and administration.",
+  },
+  {
+    icon: MessageSquareText,
+    num: "/ 06",
+    title: "AI Complaint Assistant",
+    description:
+      "An intelligent chatbot that helps students draft, refine, and submit complaints with guided prompts and smart suggestions.",
   },
 ];
 
