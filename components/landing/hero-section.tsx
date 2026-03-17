@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { BlurIn } from "@/components/ui/blur-in";
 import { SplitText } from "@/components/ui/split-text";
@@ -42,7 +43,7 @@ export const HeroSection = () => (
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
-            href="/track"
+            href="/student"
             className="inline-flex items-center gap-2 rounded-full border border-border px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:border-foreground/30"
           >
             <Search className="h-4 w-4" />
@@ -72,13 +73,43 @@ const MiniCard = ({ icon, label, value }: { icon: string; label: string; value: 
     check: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
   };
 
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
+  };
+
   return (
-    <div className="clean-card p-4 text-left">
-      <svg className="h-4 w-4 text-muted-foreground mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d={paths[icon]} />
-      </svg>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-foreground mt-0.5">{value}</p>
+    <div 
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      className="relative bg-card border-border p-4 text-left overflow-hidden group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+    >
+      {/* Glare effect */}
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 dark:mix-blend-lighten"
+        style={{
+          background: `radial-gradient(200px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 255, 255, 0.08), transparent 40%)`,
+        }}
+      />
+      <div
+        className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-700 light:mix-blend-darken dark:hidden"
+        style={{
+          background: `radial-gradient(200px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(0, 0, 0, 0.04), transparent 40%)`,
+        }}
+      />
+      
+      <div className="relative z-10">
+        <svg className="h-4 w-4 text-muted-foreground mb-2 group-hover:text-foreground transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d={paths[icon]} />
+        </svg>
+        <p className="text-xs text-muted-foreground group-hover:text-foreground/80 transition-colors duration-300">{label}</p>
+        <p className="text-sm font-semibold text-foreground mt-0.5">{value}</p>
+      </div>
     </div>
   );
 };
