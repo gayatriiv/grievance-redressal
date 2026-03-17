@@ -48,7 +48,7 @@ export default async function AdminDashboard() {
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
-      <Sidebar items={[{ href: "/admin", label: "All Grievances" }, { href: "/analytics", label: "Analytics" }, { href: "/patterns", label: "Patterns" }, { href: "/ai-settings", label: "AI Settings" }]} />
+      <Sidebar items={[{ href: "/admin", label: "All Grievances" }, { href: "/analytics", label: "Analytics" }, { href: "/patterns", label: "Patterns" }, { href: "/ai-settings", label: "AI Settings" }, { href: "/users", label: "Users" }]} />
       <section className="flex-1 space-y-6 px-8 pb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin Dashboard</h1>

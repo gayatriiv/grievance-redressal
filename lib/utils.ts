@@ -13,13 +13,14 @@ export const grievanceCategories = [
   "Other",
 ] as const;
 
-export const grievanceStatusValues = ["Submitted", "UnderReview", "Assigned", "InProgress", "Resolved", "Closed"] as const;
+export const grievanceStatusValues = ["Submitted", "UnderReview", "Assigned", "InProgress", "Escalated", "Resolved", "Closed"] as const;
 
 const grievanceStatusLabels: Record<(typeof grievanceStatusValues)[number], string> = {
   Submitted: "Submitted",
   UnderReview: "Under Review",
   Assigned: "Assigned",
   InProgress: "In Progress",
+  Escalated: "Escalated",
   Resolved: "Resolved",
   Closed: "Closed",
 };

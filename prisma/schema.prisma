@@ -25,6 +25,7 @@ enum GrievanceStatus {
   UnderReview
   Assigned
   InProgress
+  Escalated
   Resolved
   Closed
 }

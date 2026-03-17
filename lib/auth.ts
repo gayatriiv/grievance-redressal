@@ -2,12 +2,17 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { resolveOrganizationUser } from "@/lib/org";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -53,13 +58,39 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        (token as any).id = (user as any).id;
-        (token as any).role = (user as any).role;
-        (token as any).department = (user as any).department;
-        (token as any).rollNumber = (user as any).rollNumber;
+    async signIn({ user, account }) {
+      if (account?.provider !== "google") return true;
+      const email = user?.email?.trim().toLowerCase();
+      if (!email) return false;
+
+      // Google OAuth must map to a pre-created DB user (admin can add via Users page).
+      const dbUser = await prisma.user.findUnique({ where: { email } });
+      if (!dbUser) return false;
+
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      // For Google OAuth: hydrate token from DB so role-based routing is correct.
+      if (account?.provider === "google") {
+        const email = (user?.email ?? (token.email as string | undefined))?.trim().toLowerCase();
+        if (email) {
+          const dbUser = await prisma.user.findUnique({ where: { email } });
+          if (dbUser) {
+            (token as any).id = dbUser.id;
+            (token as any).role = dbUser.role;
+            (token as any).department = dbUser.department;
+            (token as any).rollNumber = dbUser.rollNumber;
+          }
+        }
       }
+
+      if (user) {
+        (token as any).id = (user as any).id ?? (token as any).id;
+        (token as any).role = (user as any).role ?? (token as any).role;
+        (token as any).department = (user as any).department ?? (token as any).department;
+        (token as any).rollNumber = (user as any).rollNumber ?? (token as any).rollNumber;
+      }
+
       return token;
     },
     async session({ session, token }) {

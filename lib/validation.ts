@@ -37,3 +37,11 @@ export const signupSchema = z.object({
   rollNumber: optionalText,
 });
 
+export const adminCreateUserSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().email(),
+  role: z.enum(["student", "department", "admin"]),
+  department: optionalText,
+  rollNumber: optionalText,
+});
+
