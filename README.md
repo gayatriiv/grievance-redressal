@@ -8,6 +8,7 @@
    
 
 ## team members
+- Aditi Garud, roll no:13
 - Shravani Jedhe, roll no:20
 - Shriya Jedhe, roll no:21
 
