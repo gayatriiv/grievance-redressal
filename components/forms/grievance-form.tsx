@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
-import { grievanceCategories } from "@/lib/utils";
+import { grievanceCategories, normalizeDepartmentName } from "@/lib/utils";
 import { DuplicateComplaints } from "@/components/forms/duplicate-complaints";
 
 type FormFields = {
@@ -75,7 +75,7 @@ export const GrievanceForm = ({
   const [fields, setFields] = useState<FormFields>({
     name: defaults?.name ?? "",
     rollNumber: defaults?.rollNumber ?? "",
-    department: defaults?.department ?? "",
+    department: "",
     category: "",
     title: "",
     description: "",
@@ -224,7 +224,7 @@ export const GrievanceForm = ({
       const res = await fetch("/api/ai/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages, department: fields.department || defaults?.department || "" }),
+        body: JSON.stringify({ messages: nextMessages, department: fields.department || "" }),
       });
       const data = await res.json();
 
@@ -398,18 +398,47 @@ export const GrievanceForm = ({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="g-dept" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Department</label>
-          <input id="g-dept" name="department" placeholder="e.g. Computer Engineering" className={inputClasses} value={fields.department} onChange={(e) => setField("department", e.target.value)} required />
-          {fieldError("department") && <p className="mt-1 text-xs text-red-400">{fieldError("department")}</p>}
-        </div>
-        <div>
           <label htmlFor="g-cat" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Category</label>
-          <select id="g-cat" name="category" className={inputClasses} value={fields.category} onChange={(e) => setField("category", e.target.value)}>
-            <option value="">Auto-detect category</option>
+          <select
+            id="g-cat"
+            name="category"
+            className={inputClasses}
+            value={fields.category}
+            onChange={(e) => {
+              const category = e.target.value;
+              setField("category", category);
+              setField("department", "");
+            }}
+            required
+          >
+            <option value="">Select category</option>
             {grievanceCategories.map((category) => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label htmlFor="g-dept" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Department (where this should go)</label>
+          <select
+            id="g-dept"
+            name="department"
+            className={inputClasses}
+            value={fields.department}
+            onChange={(e) => setField("department", normalizeDepartmentName(e.target.value) ?? "")}
+            required
+            disabled={!fields.category}
+          >
+            <option value="">{fields.category ? "Select department to receive this complaint" : "Select category first"}</option>
+            <option value="Academic Office">Academic Office</option>
+            <option value="HOD">HOD</option>
+            <option value="Examination Cell">Examination Cell</option>
+            <option value="Library Staff">Library Staff</option>
+            <option value="Hostel Administration">Hostel Administration</option>
+            <option value="Maintenance Department">Maintenance Department</option>
+            <option value="Admin Office">Admin Office</option>
+            <option value="General Administration">General Administration</option>
+          </select>
+          {fieldError("department") && <p className="mt-1 text-xs text-red-400">{fieldError("department")}</p>}
         </div>
       </div>
 

@@ -19,10 +19,24 @@ const iconFor = (href: string) => {
   return <LayoutDashboard className="h-4 w-4" />;
 };
 
-export const Sidebar = ({ items }: { items: SidebarItem[] }) => {
+export const Sidebar = ({
+  items,
+  workspaceTitle,
+}: {
+  items: SidebarItem[];
+  workspaceTitle?: string;
+}) => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+
+  const resolvedWorkspaceTitle =
+    workspaceTitle ??
+    (pathname.startsWith("/student")
+      ? "Student Portal"
+      : pathname.startsWith("/department")
+        ? "Department Console"
+        : "Admin Console");
 
   useEffect(() => {
     setIsOpen(false);
@@ -61,7 +75,7 @@ export const Sidebar = ({ items }: { items: SidebarItem[] }) => {
           {!collapsed && (
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Workspace</p>
-              <p className="mt-1 text-lg font-semibold text-foreground">Admin Console</p>
+              <p className="mt-1 text-lg font-semibold text-foreground">{resolvedWorkspaceTitle}</p>
             </div>
           )}
           <button
@@ -111,7 +125,7 @@ export const Sidebar = ({ items }: { items: SidebarItem[] }) => {
               <div className="mb-5 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Workspace</p>
-                  <p className="mt-1 text-base font-semibold text-foreground">Admin Console</p>
+                  <p className="mt-1 text-base font-semibold text-foreground">{resolvedWorkspaceTitle}</p>
                 </div>
                 <button
                   type="button"

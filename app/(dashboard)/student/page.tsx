@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { FileText, MessageSquare, Search, Users } from "lucide-react";
+import { LayoutDashboard, User, ListChecks, FileText, MessageSquare, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { formatGrievanceStatus, getDashboardPathForRole } from "@/lib/utils";
+import { Sidebar } from "@/components/layout/sidebar";
 
 export default async function StudentDashboard() {
   const sessionUser = await getSessionUser();
@@ -29,49 +30,115 @@ export default async function StudentDashboard() {
     },
   });
 
+  const allGrievancesForStats = await prisma.grievance.findMany({
+    select: {
+      status: true,
+      category: true,
+    },
+  });
+
   const total = grievances.length;
-  const resolved = grievances.filter((grievance) => grievance.status === "Resolved" || grievance.status === "Closed").length;
+  const resolved = grievances.filter(
+    (grievance) => grievance.status === "Resolved" || grievance.status === "Closed",
+  ).length;
   const open = total - resolved;
   const latestGrievance = grievances[0];
 
-  const cards = [
-    { href: "/submit-grievance", label: "Submit Grievance", desc: "File a new complaint", icon: FileText },
-    { href: latestGrievance ? `/track/${latestGrievance.id}` : "/submit-grievance", label: "Track Status", desc: latestGrievance ? "Check your latest complaint progress" : "Track after your first submission", icon: Search },
-    { href: latestGrievance ? `/chat?grievanceId=${latestGrievance.id}` : "/chat", label: "Chat with Department", desc: "Discuss your assigned case", icon: MessageSquare },
-    { href: "/community", label: "Support Complaints", desc: "Vote, follow, and comment on shared issues", icon: Users },
+  const systemTotal = allGrievancesForStats.length;
+  const systemResolved = allGrievancesForStats.filter(
+    (g) => g.status === "Resolved" || g.status === "Closed",
+  ).length;
+  const systemOpen = systemTotal - systemResolved;
+
+  const categoryCounts = allGrievancesForStats.reduce<Record<string, number>>((acc, g) => {
+    acc[g.category] = (acc[g.category] || 0) + 1;
+    return acc;
+  }, {});
+  const topCategories = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+  const maxCategoryCount = topCategories[0]?.[1] ?? 0;
+
+  const sidebarItems = [
+    {
+      href: "/student",
+      label: "Main Dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
+      href: "/student/profile",
+      label: "Profile",
+      icon: <User className="h-4 w-4" />,
+    },
+    {
+      href: "/student/grievances",
+      label: "Track Grievances",
+      icon: <ListChecks className="h-4 w-4" />,
+    },
+    {
+      href: "/submit-grievance",
+      label: "Submit Grievance",
+      icon: <FileText className="h-4 w-4" />,
+    },
+    {
+      href: "/chat",
+      label: "Chat with Department",
+      icon: <MessageSquare className="h-4 w-4" />,
+    },
+    {
+      href: "/community",
+      label: "Community Discussion",
+      icon: <Users className="h-4 w-4" />,
+    },
   ];
 
   return (
-    <main className="min-h-[calc(100vh-6rem)] bg-background">
-      <div className="mx-auto max-w-5xl space-y-8 px-6 pb-24 pt-3">
+    <main className="flex min-h-[calc(100vh-6rem)] bg-background">
+      <Sidebar items={sidebarItems} workspaceTitle="Student Portal" />
+      <section className="flex-1 space-y-8 px-6 pb-24 pt-3 lg:px-10">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Student Portal</h1>
           <p className="mt-2 text-sm text-muted-foreground">Manage your grievances and track resolutions.</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {cards.map((c) => (
-            <Link key={c.label} href={c.href} className="group clean-card p-6 flex flex-col gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors group-hover:border-foreground/20">
-                <c.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
-              </div>
-              <h3 className="text-sm font-medium text-foreground">{c.label}</h3>
-              <p className="text-xs text-muted-foreground">{c.desc}</p>
-            </Link>
-          ))}
-        </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="clean-card p-5">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Total Grievances</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Your Grievances</p>
             <p className="mt-2 text-2xl font-semibold text-foreground">{total}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {resolved} resolved · {open} open
+            </p>
           </div>
           <div className="clean-card p-5">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Open Cases</p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">{open}</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">All Students (System)</p>
+            <p className="mt-2 text-2xl font-semibold text-foreground">{systemTotal}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {systemResolved} resolved · {systemOpen} open
+            </p>
           </div>
           <div className="clean-card p-5">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Resolved</p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">{resolved}</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Top Categories</p>
+            <div className="mt-3 space-y-2">
+              {topCategories.length === 0 && (
+                <p className="text-xs text-muted-foreground">No grievances have been filed yet.</p>
+              )}
+              {topCategories.map(([category, count]) => (
+                <div key={category}>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span className="truncate">{category}</span>
+                    <span>{count}</span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-border">
+                    <div
+                      className="h-1.5 rounded-full bg-foreground/70"
+                      style={{
+                        width: `${maxCategoryCount ? Math.max((count / maxCategoryCount) * 100, 10) : 0}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -100,7 +167,7 @@ export default async function StudentDashboard() {
             ))}
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
