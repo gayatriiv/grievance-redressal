@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { getDashboardPathForRole } from "@/lib/utils";
@@ -16,6 +17,8 @@ export default async function PatternsPage() {
   if (sessionUser.role !== "admin") {
     redirect(getDashboardPathForRole(sessionUser.role));
   }
+
+  await autoEscalateOverdueGrievances();
 
   // Fetch all grievances grouped by category
   const grievances = await prisma.grievance.findMany({

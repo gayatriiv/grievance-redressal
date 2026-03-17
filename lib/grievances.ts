@@ -1,3 +1,4 @@
+import { autoEscalateGrievanceById } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import type { AppSessionUser } from "@/lib/session";
 import { normalizeDepartmentName } from "@/lib/utils";
@@ -41,6 +42,8 @@ export const canAccessGrievance = (
 };
 
 export const getAccessibleGrievance = async (grievanceId: string, user: AppSessionUser) => {
+  await autoEscalateGrievanceById(grievanceId);
+
   const grievance = await prisma.grievance.findUnique({
     where: { id: grievanceId },
     include: grievanceDetailInclude,

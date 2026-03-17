@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AnalyticsCharts } from "@/components/dashboard/analytics-charts";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { formatGrievanceStatus, getDashboardPathForRole } from "@/lib/utils";
@@ -16,6 +17,8 @@ export default async function AdminDashboard() {
     redirect(getDashboardPathForRole(sessionUser.role));
   }
 
+  await autoEscalateOverdueGrievances();
+
   const grievances = await prisma.grievance.findMany({
     orderBy: { updatedAt: "desc" },
     take: 10,
@@ -26,6 +29,7 @@ export default async function AdminDashboard() {
       urgency: true,
       status: true,
       departmentAssigned: true,
+      escalatedAt: true,
       updatedAt: true,
       isAnonymous: true,
       votes: { select: { value: true } },
@@ -38,11 +42,13 @@ export default async function AdminDashboard() {
   const total = await prisma.grievance.count();
   const resolved = await prisma.grievance.count({ where: { OR: [{ status: "Resolved" }, { status: "Closed" }] } });
   const critical = await prisma.grievance.count({ where: { OR: [{ urgency: "Critical" }, { urgency: "High" }] } });
+  const escalated = await prisma.grievance.count({ where: { escalatedAt: { not: null } } });
 
   const stats = [
     { label: "Total", value: String(total) },
     { label: "Open", value: String(total - resolved) },
     { label: "Resolved", value: String(resolved) },
+    { label: "Escalated", value: String(escalated) },
     { label: "High Priority", value: String(critical) },
   ];
 
@@ -64,7 +70,7 @@ export default async function AdminDashboard() {
             </div>
           </div>
         </div>
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           {stats.map((s) => (
             <div key={s.label} className="clean-card p-5">
               <p className="text-xs uppercase tracking-wider text-muted-foreground">{s.label}</p>
@@ -95,6 +101,11 @@ export default async function AdminDashboard() {
                     {grievance.isAnonymous ? "Anonymous" : grievance.student.name} · {grievance.isAnonymous ? "Unknown Department" : (grievance.student.department || "Unknown Department")} · {grievance.departmentAssigned}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{grievance.category} · {grievance.urgency} · {formatGrievanceStatus(grievance.status)}</p>
+                  {grievance.escalatedAt && (
+                    <p className="mt-2 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+                      Escalated on {new Date(grievance.escalatedAt).toLocaleString()}
+                    </p>
+                  )}
                 </div>
                 <Link href={`/track/${grievance.id}`} className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90">Track</Link>
               </div>

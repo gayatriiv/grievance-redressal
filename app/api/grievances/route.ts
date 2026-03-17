@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { classifyGrievance } from "@/lib/ai";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizeDepartmentName, resolveDepartmentAssignment } from "@/lib/utils";
@@ -68,6 +69,8 @@ const ANON_STUDENT = { id: "", name: "Anonymous", email: "", department: null, r
 export async function GET(req: NextRequest) {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+  await autoEscalateOverdueGrievances();
 
   const searchParams = new URL(req.url).searchParams;
   const status = searchParams.get("status") || undefined;
