@@ -6,7 +6,7 @@ import {
   GitBranch,
   Activity,
   TrendingUp,
-  Shield,
+  StarHalf,
   MessageSquareText,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -41,11 +41,11 @@ const features: { icon: LucideIcon; title: string; description: string; num: str
       "Identifies recurring issues across departments to help the institution take preventive action.",
   },
   {
-    icon: Shield,
+    icon: StarHalf,
     num: "/ 05",
-    title: "Transparency & Accountability",
+    title: "Feedback & Rating System",
     description:
-      "Ensures clear communication and accountability between students and administration.",
+      "After a complaint is resolved, students can rate the resolution process and provide feedback on service quality.",
   },
   {
     icon: MessageSquareText,
