@@ -6,6 +6,7 @@ import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { formatGrievanceStatus, getDashboardPathForRole } from "@/lib/utils";
+import { adminSidebarItems } from "@/lib/navigation";
 
 export default async function AdminDashboard() {
   const sessionUser = await getSessionUser();
@@ -60,16 +61,7 @@ export default async function AdminDashboard() {
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
-      <Sidebar
-        items={[
-          { href: "/admin", label: "Overview" },
-          { href: "/admin/grievances", label: "Grievances" },
-          { href: "/analytics", label: "Analytics" },
-          { href: "/patterns", label: "Patterns" },
-          { href: "/ai-settings", label: "AI Settings" },
-          { href: "/users", label: "Users" },
-        ]}
-      />
+      <Sidebar items={adminSidebarItems} />
       <section className="flex-1 px-6 pb-10 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-6 pt-3">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -101,7 +93,7 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="mt-4 grid gap-4 md:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label} className="clean-card p-5">
               <p className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -112,7 +104,7 @@ export default async function AdminDashboard() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.35fr,1fr]">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr,1fr]">
           <div className="clean-card p-6">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
