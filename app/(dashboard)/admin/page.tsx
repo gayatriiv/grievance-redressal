@@ -36,7 +36,6 @@ export default async function AdminDashboard() {
       votes: { select: { value: true } },
       follows: { select: { id: true } },
       comments: { select: { id: true } },
-      student: { select: { name: true, department: true } },
     },
   });
 
@@ -155,14 +154,8 @@ export default async function AdminDashboard() {
                       {grievance.title}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {grievance.isAnonymous
-                        ? "Anonymous"
-                        : grievance.student.name}{" "}
-                      ·{" "}
-                      {grievance.isAnonymous
-                        ? "Unknown Department"
-                        : grievance.student.department || "Unknown Department"}{" "}
-                      · {grievance.departmentAssigned}
+                      {grievance.isAnonymous ? "Anonymous" : "Unknown student"} ·{" "}
+                      {grievance.departmentAssigned || "Unknown Department"}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {grievance.category} · {grievance.urgency} ·{" "}

@@ -4,15 +4,6 @@ import type { AppSessionUser } from "@/lib/session";
 import { normalizeDepartmentName } from "@/lib/utils";
 
 export const grievanceDetailInclude = {
-  student: {
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      department: true,
-      rollNumber: true,
-    },
-  },
   attachments: true,
   responses: {
     orderBy: { createdAt: "asc" as const },

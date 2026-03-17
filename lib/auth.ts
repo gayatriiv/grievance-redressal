@@ -63,9 +63,31 @@ export const authOptions: NextAuthOptions = {
       const email = user?.email?.trim().toLowerCase();
       if (!email) return false;
 
-      // Google OAuth must map to a pre-created DB user (admin can add via Users page).
-      const dbUser = await prisma.user.findUnique({ where: { email } });
-      if (!dbUser) return false;
+      // Only allow MES domains.
+      const isMesDomain =
+        email.endsWith("@student.mes.ac.in") || email.endsWith("@mes.ac.in");
+      if (!isMesDomain) return false;
+
+      // Auto-provision or normalize the user based on org rules.
+      let dbUser = await prisma.user.findUnique({ where: { email } });
+      if (!dbUser) {
+        const resolvedUser = resolveOrganizationUser({
+          email,
+          department: null,
+          existingRole: null,
+        });
+
+        if (!resolvedUser.isValid || !resolvedUser.role) return false;
+
+        dbUser = await prisma.user.create({
+          data: {
+            email,
+            name: user.name ?? null,
+            role: resolvedUser.role,
+            department: resolvedUser.department,
+          },
+        });
+      }
 
       return true;
     },

@@ -23,7 +23,6 @@ export default async function AdminGrievancesPage() {
       departmentAssigned: true,
       updatedAt: true,
       isAnonymous: true,
-      student: { select: { name: true, department: true } },
       votes: { select: { value: true } },
       follows: { select: { id: true } },
       comments: { select: { id: true } },
@@ -82,9 +81,9 @@ export default async function AdminGrievancesPage() {
                             </p>
                           </td>
                           <td className="px-3 py-3 text-sm text-muted-foreground">
-                            {g.isAnonymous ? "Anonymous" : g.student.name}
+                            {g.isAnonymous ? "Anonymous" : "Unknown student"}
                             <div className="mt-1 text-xs text-muted-foreground">
-                              {g.isAnonymous ? "Unknown Department" : (g.student.department || "Unknown Department")}
+                              {g.departmentAssigned || "Unknown Department"}
                             </div>
                           </td>
                           <td className="px-3 py-3 text-sm text-muted-foreground">{g.departmentAssigned}</td>
