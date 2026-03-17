@@ -18,7 +18,7 @@ export default async function AISettingsPage() {
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
-      <Sidebar items={adminSidebarItems} />
+      <Sidebar items={[...adminSidebarItems]} />
       <section className="flex-1 px-6 pb-10 lg:px-10">
         <div className="mx-auto max-w-3xl pt-3 space-y-6">
           <BackButton href="/admin" label="Back to admin dashboard" className="ml-12 lg:-ml-1" />

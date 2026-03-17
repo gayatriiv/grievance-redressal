@@ -81,7 +81,7 @@ export default async function PatternsPage() {
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
-      <Sidebar items={adminSidebarItems} />
+      <Sidebar items={[...adminSidebarItems]} />
       <section className="flex-1 px-6 pb-10 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-8 pt-3">
           <div>

@@ -61,7 +61,7 @@ export default async function AdminDashboard() {
 
   return (
     <main className="flex min-h-[calc(100vh-6rem)] bg-background">
-      <Sidebar items={adminSidebarItems} />
+      <Sidebar items={[...adminSidebarItems]} />
       <section className="flex-1 px-6 pb-10 lg:px-10">
         <div className="mx-auto max-w-7xl space-y-6 pt-3">
           <div className="flex flex-wrap items-end justify-between gap-4">
