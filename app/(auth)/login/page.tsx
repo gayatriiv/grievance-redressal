@@ -11,7 +11,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
-  const callbackUrl = searchParams.get("callbackUrl") || "";
+  const rawCallbackUrl = searchParams.get("callbackUrl") || "";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -37,8 +37,15 @@ function LoginForm() {
     const session = await fetch("/api/auth/session").then((r) => r.json());
     const role = session?.user?.role;
 
-    if (callbackUrl) {
-      router.push(callbackUrl);
+    const effectiveCallback =
+      !rawCallbackUrl ||
+      rawCallbackUrl === "/" ||
+      rawCallbackUrl === window.location.origin
+        ? "/post-auth"
+        : rawCallbackUrl;
+
+    if (effectiveCallback) {
+      router.push(effectiveCallback);
     } else if (role === "admin") {
       router.push("/admin");
     } else if (role === "department") {
@@ -52,7 +59,14 @@ function LoginForm() {
     setGoogleLoading(true);
     setError("");
     try {
-      await signIn("google", { callbackUrl: callbackUrl || "/post-auth" });
+      const effectiveCallback =
+        !rawCallbackUrl ||
+        rawCallbackUrl === "/" ||
+        rawCallbackUrl === window.location.origin
+          ? "/post-auth"
+          : rawCallbackUrl;
+
+      await signIn("google", { callbackUrl: effectiveCallback });
     } catch {
       setError("Google sign-in failed. Please try again.");
       setGoogleLoading(false);
@@ -146,8 +160,8 @@ function LoginForm() {
           Don&apos;t have an account?{" "}
           <Link
             href={
-              callbackUrl
-                ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              rawCallbackUrl
+                ? `/signup?callbackUrl=${encodeURIComponent(rawCallbackUrl)}`
                 : "/signup"
             }
             className="text-foreground underline underline-offset-4 hover:opacity-80"

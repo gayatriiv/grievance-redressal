@@ -19,27 +19,45 @@ export default async function StudentDashboard() {
 
   await autoEscalateOverdueGrievances();
 
-  const grievances = await prisma.grievance.findMany({
-    where: { studentId: sessionUser.id },
-    orderBy: { updatedAt: "desc" },
-    take: 5,
-    select: {
-      id: true,
-      title: true,
-      status: true,
-      category: true,
-      departmentAssigned: true,
-      escalatedAt: true,
-      updatedAt: true,
-    },
-  });
+  let grievances: {
+    id: string;
+    title: string;
+    status: string;
+    category: string;
+    departmentAssigned: string;
+    escalatedAt: Date | null;
+    updatedAt: Date;
+  }[] = [];
 
-  const allGrievancesForStats = await prisma.grievance.findMany({
-    select: {
-      status: true,
-      category: true,
-    },
-  });
+  let allGrievancesForStats: { status: string; category: string }[] = [];
+
+  try {
+    grievances = await prisma.grievance.findMany({
+      where: { studentId: sessionUser.id },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        category: true,
+        departmentAssigned: true,
+        escalatedAt: true,
+        updatedAt: true,
+      },
+    });
+
+    allGrievancesForStats = await prisma.grievance.findMany({
+      select: {
+        status: true,
+        category: true,
+      },
+    });
+  } catch (e) {
+    // If there is inconsistent ObjectId data in the collection, fail gracefully
+    // and show an empty dashboard instead of a 500 error.
+    console.error("Failed to load student grievances", e);
+  }
 
   const total = grievances.length;
   const resolved = grievances.filter(

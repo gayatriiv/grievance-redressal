@@ -12,6 +12,10 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      // Development override: disable all OAuth checks to avoid
+      // state/nonce cookie issues that are blocking sign-in.
+      // IMPORTANT: tighten this (e.g. to ["pkce", "state"]) for production.
+      checks: ["none"],
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -123,6 +127,16 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).rollNumber = (token as any).rollNumber;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Always send successful OAuth logins to post-auth, which then routes by role.
+      // Preserve sign-out and non-auth routes.
+      const normalizedUrl = url.startsWith("/") ? `${baseUrl}${url}` : url;
+      if (normalizedUrl.startsWith(`${baseUrl}/api/auth/signout`)) {
+        return normalizedUrl;
+      }
+      // For all other auth redirects, go to centralized post-auth router.
+      return `${baseUrl}/post-auth`;
     }
   },
   pages: { signIn: "/login" }

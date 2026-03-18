@@ -2,10 +2,12 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LenisProvider } from "@/components/lenis-provider";
+import { AuthSessionProvider } from "@/components/auth-session-provider";
 
 export const metadata: Metadata = {
   title: "AI Based Grievance Redressal System – Pillai College of Engineering",
-  description: "A smart platform that helps students submit complaints, ensures they reach the right department, and provides transparent real-time resolution tracking.",
+  description:
+    "A smart platform that helps students submit complaints, ensures they reach the right department, and provides transparent real-time resolution tracking.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -26,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <LenisProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <AuthSessionProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </AuthSessionProvider>
         </LenisProvider>
       </body>
     </html>
