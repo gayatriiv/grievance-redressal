@@ -26,6 +26,11 @@ export const UsersAdminPanel = () => {
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");
 
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingRole, setEditingRole] = useState<Role>("student");
+  const [editingDepartment, setEditingDepartment] = useState("");
+  const [editingRollNumber, setEditingRollNumber] = useState("");
+
   const canSubmit = useMemo(() => {
     if (!name.trim() || !email.trim()) return false;
     if (role === "department" && !department.trim()) return false;
@@ -78,6 +83,63 @@ export const UsersAdminPanel = () => {
       await load();
     } catch (e: any) {
       setError(e?.message ?? "Failed to create user");
+    }
+  };
+
+  const startEdit = (user: AdminUser) => {
+    setEditingId(user.id);
+    setEditingRole(user.role);
+    setEditingDepartment(user.department ?? "");
+    setEditingRollNumber(user.rollNumber ?? "");
+    setMsg("");
+    setError("");
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingDepartment("");
+    setEditingRollNumber("");
+  };
+
+  const onSaveEdit = async () => {
+    if (!editingId) return;
+    setMsg("");
+    setError("");
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingId,
+          role: editingRole,
+          department: editingDepartment || undefined,
+          rollNumber: editingRole === "student" ? editingRollNumber || undefined : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message ?? "Failed to update user");
+      setMsg("User updated.");
+      setEditingId(null);
+      await load();
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to update user");
+    }
+  };
+
+  const onDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    setMsg("");
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/users?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message ?? "Failed to delete user");
+      setMsg("User deleted.");
+      await load();
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to delete user");
     }
   };
 
@@ -186,6 +248,7 @@ export const UsersAdminPanel = () => {
                 <th className="px-3 py-2">Department</th>
                 <th className="px-3 py-2">Roll</th>
                 <th className="px-3 py-2">Created</th>
+                <th className="px-3 py-2" />
               </tr>
             </thead>
             <tbody>
@@ -202,18 +265,95 @@ export const UsersAdminPanel = () => {
                   </td>
                 </tr>
               ) : (
-                users.map((u) => (
-                  <tr key={u.id} className="rounded-xl border border-border bg-background/40">
-                    <td className="px-3 py-3 text-sm text-foreground">{u.name}</td>
-                    <td className="px-3 py-3 text-sm text-foreground">{u.email}</td>
-                    <td className="px-3 py-3 text-sm text-foreground">{u.role}</td>
-                    <td className="px-3 py-3 text-sm text-muted-foreground">{u.department || "-"}</td>
-                    <td className="px-3 py-3 text-sm text-muted-foreground">{u.rollNumber || "-"}</td>
-                    <td className="px-3 py-3 text-sm text-muted-foreground">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
+                users.map((u) => {
+                  const isEditing = editingId === u.id;
+                  return (
+                    <tr key={u.id} className="rounded-xl border border-border bg-background/40">
+                      <td className="px-3 py-3 text-sm text-foreground">{u.name}</td>
+                      <td className="px-3 py-3 text-sm text-foreground">{u.email}</td>
+                      <td className="px-3 py-3 text-sm text-foreground">
+                        {isEditing ? (
+                          <select
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
+                            value={editingRole}
+                            onChange={(e) => setEditingRole(e.target.value as Role)}
+                          >
+                            <option value="student">Student</option>
+                            <option value="department">Department</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        ) : (
+                          u.role
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-muted-foreground">
+                        {isEditing ? (
+                          <input
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
+                            value={editingDepartment}
+                            onChange={(e) => setEditingDepartment(e.target.value)}
+                            placeholder={editingRole === "department" ? "e.g. Computer Engineering" : "Administration (optional)"}
+                          />
+                        ) : (
+                          u.department || "-"
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-muted-foreground">
+                        {isEditing ? (
+                          <input
+                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none"
+                            value={editingRollNumber}
+                            onChange={(e) => setEditingRollNumber(e.target.value)}
+                            placeholder="Optional (students)"
+                            disabled={editingRole !== "student"}
+                          />
+                        ) : (
+                          u.rollNumber || "-"
+                        )}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-muted-foreground">
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-3 py-3 text-sm text-muted-foreground">
+                        {isEditing ? (
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={onSaveEdit}
+                              className="rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background hover:opacity-90"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEdit}
+                              className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground hover:border-foreground/20"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(u)}
+                              className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground hover:border-foreground/20"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onDelete(u.id)}
+                              className="rounded-full border border-red-500/60 px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/10"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

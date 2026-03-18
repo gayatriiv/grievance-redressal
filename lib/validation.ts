@@ -45,3 +45,11 @@ export const adminCreateUserSchema = z.object({
   rollNumber: optionalText,
 });
 
+export const adminUpdateUserSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().min(2).max(100).optional(),
+  role: z.enum(["student", "department", "admin"]).optional(),
+  department: optionalText,
+  rollNumber: optionalText,
+});
+
