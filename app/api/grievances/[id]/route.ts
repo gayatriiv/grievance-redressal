@@ -68,16 +68,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     include: grievanceDetailInclude,
   });
 
-  const baseStudent =
-    updated.isAnonymous && sessionUser.role !== "student"
-      ? ANON_STUDENT
-      : {
-          id: updated.studentId,
-          name: "Unknown",
-          email: "",
-          department: null as string | null,
-          rollNumber: null as string | null,
-        };
+  const baseStudent = updated.isAnonymous
+    ? ANON_STUDENT
+    : {
+        id: updated.studentId,
+        name: "Unknown",
+        email: "",
+        department: null as string | null,
+        rollNumber: null as string | null,
+      };
 
   return NextResponse.json({ ...updated, student: baseStudent });
 }
