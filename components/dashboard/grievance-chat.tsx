@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Send } from "lucide-react";
 import { StatusTimeline } from "@/components/dashboard/status-timeline";
-import { formatGrievanceStatus, grievanceStatusValues } from "@/lib/utils";
+import { formatGrievanceStatus, getEscalationDeadline, grievanceStatusValues } from "@/lib/utils";
 
 type GrievanceListItem = {
   id: string;
@@ -24,6 +24,10 @@ type GrievanceDetail = {
   status: string;
   urgency: string;
   departmentAssigned: string;
+  createdAt: string;
+  escalatedAt?: string | null;
+  escalationTarget?: string | null;
+  escalationReason?: string | null;
   responses: Array<{
     id: string;
     message: string;
@@ -68,6 +72,7 @@ export const GrievanceChat = ({
   const [status, setStatus] = useState<string>("Submitted");
 
   const activeGrievance = grievances.find((grievance) => grievance.id === selectedId);
+  const escalationDeadline = detail ? getEscalationDeadline(detail.createdAt) : null;
 
   const loadDetail = async () => {
     if (!selectedId) return;
@@ -258,6 +263,24 @@ export const GrievanceChat = ({
             </div>
 
             <StatusTimeline status={detail.status} />
+
+            {detail.escalatedAt ? (
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+                <p className="text-sm font-medium text-foreground">
+                  Escalated to {detail.escalationTarget || "higher authorities"} on {new Date(detail.escalatedAt).toLocaleString()}.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {detail.escalationReason || "This grievance crossed the resolution window and was escalated automatically."}
+                </p>
+              </div>
+            ) : escalationDeadline && detail.status !== "Resolved" && detail.status !== "Closed" ? (
+              <div className="rounded-2xl border border-border bg-background/50 p-4">
+                <p className="text-sm font-medium text-foreground">Automatic escalation is enabled.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  If this grievance is still unresolved by {escalationDeadline.toLocaleString()}, it will be escalated to administrators automatically.
+                </p>
+              </div>
+            ) : null}
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-border bg-background/50 p-4">

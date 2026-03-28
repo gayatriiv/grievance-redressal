@@ -11,3 +11,4 @@ next.config.js
 .vscode/
 package-lock.json
 yarn.lock
+client_secret_*.json

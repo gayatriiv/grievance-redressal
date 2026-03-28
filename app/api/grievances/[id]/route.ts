@@ -27,12 +27,19 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   const grievance = await getAccessibleGrievance(params.id, sessionUser);
   if (!grievance) return NextResponse.json({ message: "Grievance not found" }, { status: 404 });
 
-  // Mask student identity for anonymous grievances when the viewer is not the student owner
-  if (grievance.isAnonymous && sessionUser.role !== "student") {
-    return NextResponse.json({ ...grievance, student: ANON_STUDENT });
-  }
+  // Build a safe student payload that doesn't depend on a valid User relation.
+  const baseStudent =
+    grievance.isAnonymous && sessionUser.role !== "student"
+      ? ANON_STUDENT
+      : {
+          id: grievance.studentId,
+          name: "Unknown",
+          email: "",
+          department: null as string | null,
+          rollNumber: null as string | null,
+        };
 
-  return NextResponse.json(grievance);
+  return NextResponse.json({ ...grievance, student: baseStudent });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -61,5 +68,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     include: grievanceDetailInclude,
   });
 
-  return NextResponse.json(updated);
+  const baseStudent = updated.isAnonymous
+    ? ANON_STUDENT
+    : {
+        id: updated.studentId,
+        name: "Unknown",
+        email: "",
+        department: null as string | null,
+        rollNumber: null as string | null,
+      };
+
+  return NextResponse.json({ ...updated, student: baseStudent });
 }

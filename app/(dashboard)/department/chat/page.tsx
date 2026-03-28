@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { GrievanceChat } from "@/components/dashboard/grievance-chat";
 import { Sidebar } from "@/components/layout/sidebar";
+import { autoEscalateOverdueGrievances } from "@/lib/escalation";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { getDashboardPathForRole, normalizeDepartmentName } from "@/lib/utils";
@@ -14,6 +15,8 @@ export default async function DepartmentChatPage({ searchParams }: { searchParam
   if (sessionUser.role !== "department") {
     redirect(getDashboardPathForRole(sessionUser.role));
   }
+
+  await autoEscalateOverdueGrievances();
 
   const department = normalizeDepartmentName(sessionUser.department);
   const grievances = department

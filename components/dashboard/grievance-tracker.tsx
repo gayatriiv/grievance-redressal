@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Loader2, MessageSquare, RefreshCw } from "lucide-react";
 import { StatusTimeline } from "@/components/dashboard/status-timeline";
-import { formatGrievanceStatus } from "@/lib/utils";
+import { FeedbackRating } from "@/components/dashboard/feedback-rating";
+import { formatGrievanceStatus, getEscalationDeadline } from "@/lib/utils";
 
 type GrievanceDetail = {
   id: string;
@@ -17,6 +18,9 @@ type GrievanceDetail = {
   departmentAssigned: string;
   notes?: string | null;
   isAnonymous?: boolean;
+  escalatedAt?: string | null;
+  escalationTarget?: string | null;
+  escalationReason?: string | null;
   createdAt: string;
   updatedAt: string;
   student: { name: string; email: string; department?: string | null; rollNumber?: string | null };
@@ -100,6 +104,9 @@ export const GrievanceTracker = ({ grievanceId, role }: { grievanceId: string; r
     return <div className="glass p-6 text-sm text-red-400">{error || "Grievance not found."}</div>;
   }
 
+  const escalationDeadline = getEscalationDeadline(grievance.createdAt);
+  const isEscalated = Boolean(grievance.escalatedAt);
+
   return (
     <div className="space-y-6">
       <div className="glass space-y-6 p-6">
@@ -124,6 +131,25 @@ export const GrievanceTracker = ({ grievanceId, role }: { grievanceId: string; r
             </Link>
           </div>
         </div>
+
+        {isEscalated ? (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-sm font-medium text-foreground">
+              This complaint was escalated to {grievance.escalationTarget || "higher authorities"}.
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {grievance.escalationReason || "The complaint crossed the resolution window and was escalated automatically."}
+            </p>
+            <p className="mt-2 text-xs text-amber-200">Escalated on {new Date(grievance.escalatedAt as string).toLocaleString()}</p>
+          </div>
+        ) : grievance.status !== "Resolved" && grievance.status !== "Closed" ? (
+          <div className="rounded-2xl border border-border bg-background/40 p-4">
+            <p className="text-sm font-medium text-foreground">Automatic escalation is enabled for this complaint.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              If it remains unresolved, it will be escalated to administrators after {escalationDeadline.toLocaleString()}.
+            </p>
+          </div>
+        ) : null}
 
         <StatusTimeline status={grievance.status} />
 
@@ -188,6 +214,13 @@ export const GrievanceTracker = ({ grievanceId, role }: { grievanceId: string; r
           </div>
         </div>
       </div>
+
+      {/* Feedback & Rating section — visible when grievance is resolved/closed */}
+      <FeedbackRating
+        grievanceId={grievanceId}
+        status={grievance.status}
+        role={role}
+      />
     </div>
   );
 };

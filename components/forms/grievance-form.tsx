@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, Eye, EyeOff, Loader2, Paperclip, Send, Sparkles, X } from "lucide-react";
-import { grievanceCategories } from "@/lib/utils";
+import { grievanceCategories, normalizeDepartmentName } from "@/lib/utils";
 import { DuplicateComplaints } from "@/components/forms/duplicate-complaints";
 
 type FormFields = {
@@ -75,11 +75,12 @@ export const GrievanceForm = ({
   const [fields, setFields] = useState<FormFields>({
     name: defaults?.name ?? "",
     rollNumber: defaults?.rollNumber ?? "",
-    department: defaults?.department ?? "",
+    department: "",
     category: "",
     title: "",
     description: "",
   });
+  const [useCustomDepartment, setUseCustomDepartment] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const assistantInputRef = useRef<HTMLTextAreaElement>(null);
   const assistantMessagesRef = useRef<HTMLDivElement>(null);
@@ -87,6 +88,24 @@ export const GrievanceForm = ({
 
   const inputClasses =
     "w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-foreground/20 placeholder:text-muted-foreground/40";
+
+  const categoryDepartments: Record<string, string[]> = {
+    "Academic Issues": [
+      "Computer Engineering",
+      "Information Technology",
+      "ECS",
+      "EXTC",
+      "Automobile Engineering",
+      "Mechanical Engineering",
+    ],
+    "Hostel Issues": ["Management", "Accounts", "Administration"],
+    "Infrastructure Problems": ["Management", "Administration", "Maintenance"],
+    "Faculty Complaints": ["HOD", "Academic Office", "Principal"],
+    "Administration Issues": ["Admin Office", "Principal", "Management"],
+    "Exam / Results": ["Examination Cell", "Academic Office"],
+    Library: ["Library Staff", "Library In‑Charge"],
+    Other: ["General Administration", "Student Welfare"],
+  };
 
   const fieldError = (field: string) => errors[field]?.[0];
 
@@ -99,6 +118,13 @@ export const GrievanceForm = ({
   const assistantMeta = [assistantSummary, assistantDraft?.category, assistantDraft?.department]
     .filter(Boolean)
     .join(" · ");
+
+  const isFormReady =
+    Boolean(fields.category) &&
+    fields.department.trim().length > 0 &&
+    fields.title.trim().length > 0 &&
+    fields.description.trim().length >= 15 &&
+    (isAnonymous ? true : fields.name.trim().length > 0 && fields.rollNumber.trim().length > 0);
 
   const setField = (field: keyof FormFields, value: string) => {
     setFields((current) => ({ ...current, [field]: value }));
@@ -224,7 +250,7 @@ export const GrievanceForm = ({
       const res = await fetch("/api/ai/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages, department: fields.department || defaults?.department || "" }),
+        body: JSON.stringify({ messages: nextMessages, department: fields.department || "" }),
       });
       const data = await res.json();
 
@@ -338,8 +364,8 @@ export const GrievanceForm = ({
         return;
       }
 
-      setMessage("Grievance submitted. Redirecting to home...");
-      router.push("/");
+      setMessage("Grievance submitted. Redirecting to your grievances...");
+      router.push("/student/grievances");
     } catch {
       setMessage("Network error. Please try again.");
     }
@@ -389,7 +415,7 @@ export const GrievanceForm = ({
             {fieldError("name") && <p className="mt-1 text-xs text-red-400">{fieldError("name")}</p>}
           </div>
           <div>
-            <label htmlFor="g-roll" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Roll Number</label>
+            <label htmlFor="g-roll" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Admission Number</label>
             <input id="g-roll" name="rollNumber" placeholder="e.g. 616" className={inputClasses} value={fields.rollNumber} onChange={(e) => setField("rollNumber", e.target.value)} required />
             {fieldError("rollNumber") && <p className="mt-1 text-xs text-red-400">{fieldError("rollNumber")}</p>}
           </div>
@@ -398,18 +424,68 @@ export const GrievanceForm = ({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="g-dept" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Department</label>
-          <input id="g-dept" name="department" placeholder="e.g. Computer Engineering" className={inputClasses} value={fields.department} onChange={(e) => setField("department", e.target.value)} required />
-          {fieldError("department") && <p className="mt-1 text-xs text-red-400">{fieldError("department")}</p>}
-        </div>
-        <div>
           <label htmlFor="g-cat" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Category</label>
-          <select id="g-cat" name="category" className={inputClasses} value={fields.category} onChange={(e) => setField("category", e.target.value)}>
-            <option value="">Auto-detect category</option>
+          <select
+            id="g-cat"
+            name="category"
+            className={inputClasses}
+            value={fields.category}
+            onChange={(e) => {
+              const category = e.target.value;
+              setField("category", category);
+              setField("department", "");
+              setUseCustomDepartment(false);
+            }}
+            required
+          >
+            <option value="">Select category</option>
             {grievanceCategories.map((category) => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label htmlFor="g-dept" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Department (where this should go)
+          </label>
+          <select
+            id="g-dept"
+            name="department"
+            className={inputClasses}
+            value={useCustomDepartment ? "__other__" : fields.department}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "__other__") {
+                setUseCustomDepartment(true);
+                setField("department", "");
+              } else {
+                setUseCustomDepartment(false);
+                setField("department", normalizeDepartmentName(value) ?? "");
+              }
+            }}
+            required
+            disabled={!fields.category}
+          >
+            <option value="">{fields.category ? "Select department to receive this complaint" : "Select category first"}</option>
+            {fields.category &&
+              (categoryDepartments[fields.category] ?? []).map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            {fields.category && <option value="__other__">Other</option>}
+          </select>
+          {useCustomDepartment && (
+            <input
+              type="text"
+              className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground outline-none transition-colors focus:border-foreground/20 placeholder:text-muted-foreground/40"
+              placeholder="Enter department name"
+              value={fields.department}
+              onChange={(e) => setField("department", e.target.value)}
+              required
+            />
+          )}
+          {fieldError("department") && <p className="mt-1 text-xs text-red-400">{fieldError("department")}</p>}
         </div>
       </div>
 
@@ -420,7 +496,9 @@ export const GrievanceForm = ({
       </div>
 
       <div>
-        <label htmlFor="g-desc" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Description</label>
+        <label htmlFor="g-desc" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Description <span className="normal-case text-[11px] text-muted-foreground/80">(min 15 characters)</span>
+        </label>
         <textarea id="g-desc" name="description" rows={5} minLength={15} placeholder="Describe your grievance in detail (min 15 characters)" className={inputClasses + " resize-none"} value={fields.description} onChange={(e) => setField("description", e.target.value)} required />
         {fieldError("description") && <p className="mt-1 text-xs text-red-400">{fieldError("description")}</p>}
         {duplicatesLoading && (
@@ -489,7 +567,7 @@ export const GrievanceForm = ({
 
       <button
         type="submit"
-        disabled={loading || assistantLoading || joiningId !== null || (!duplicatesDismissed && duplicates.length > 0)}
+        disabled={!isFormReady || loading || assistantLoading || joiningId !== null || (!duplicatesDismissed && duplicates.length > 0)}
         className="w-full rounded-lg bg-foreground px-6 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading

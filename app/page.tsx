@@ -1,16 +1,38 @@
-"use client";
-
 import { Navbar } from "@/components/layout/navbar";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import { HeroSection } from "@/components/landing/hero-section";
 import { FeaturesSection } from "@/components/landing/features-section";
-import { HowItWorksSection } from "@/components/landing/how-it-works-section";
-import { DepartmentsSection } from "@/components/landing/departments-section";
-import { RolesSection } from "@/components/landing/roles-section";
-import { InsightsSection } from "@/components/landing/insights-section";
-import { TechStackSection } from "@/components/landing/tech-stack-section";
-import { StatsSection } from "@/components/landing/stats-section";
-import { ContactSection } from "@/components/landing/contact-section";
 import { Footer } from "@/components/landing/footer";
+
+const HowItWorksSection = dynamic(
+  () => import("@/components/landing/how-it-works-section").then((m) => m.HowItWorksSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
+const DepartmentsSection = dynamic(
+  () => import("@/components/landing/departments-section").then((m) => m.DepartmentsSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
+const RolesSection = dynamic(
+  () => import("@/components/landing/roles-section").then((m) => m.RolesSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
+const InsightsSection = dynamic(
+  () => import("@/components/landing/insights-section").then((m) => m.InsightsSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
+const StatsSection = dynamic(
+  () => import("@/components/landing/stats-section").then((m) => m.StatsSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
+const TechStackSection = dynamic(
+  () => import("@/components/landing/tech-stack-section").then((m) => m.TechStackSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
+const ContactSection = dynamic(
+  () => import("@/components/landing/contact-section").then((m) => m.ContactSection),
+  { ssr: false, loading: () => <div className="py-24 md:py-32" /> }
+);
 
 export default function Home() {
   return (
@@ -18,13 +40,15 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <FeaturesSection />
-      <HowItWorksSection />
-      <DepartmentsSection />
-      <RolesSection />
-      <InsightsSection />
-      <StatsSection />
-      <TechStackSection />
-      <ContactSection />
+      <Suspense>
+        <HowItWorksSection />
+        <DepartmentsSection />
+        <RolesSection />
+        <InsightsSection />
+        <StatsSection />
+        <TechStackSection />
+        <ContactSection />
+      </Suspense>
       <Footer />
     </main>
   );
