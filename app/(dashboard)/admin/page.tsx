@@ -218,7 +218,7 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <div className="clean-card p-6">
+        <div className="mt-6 clean-card p-6">
           <h2 className="text-lg font-semibold text-foreground">
             Performance & distribution
           </h2>
