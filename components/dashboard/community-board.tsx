@@ -92,9 +92,9 @@ export const CommunityBoard = () => {
       current.map((grievance) =>
         grievance.id === nextDetail.id
           ? {
-              ...grievance,
-              ...nextDetail,
-            }
+            ...grievance,
+            ...nextDetail,
+          }
           : grievance
       )
     );
