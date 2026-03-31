@@ -39,19 +39,19 @@ function LoginForm() {
 
     const effectiveCallback =
       !rawCallbackUrl ||
-      rawCallbackUrl === "/" ||
-      rawCallbackUrl === window.location.origin
+        rawCallbackUrl === "/" ||
+        rawCallbackUrl === window.location.origin
         ? "/post-auth"
         : rawCallbackUrl;
 
     if (effectiveCallback) {
-      router.push(effectiveCallback);
+      window.location.href = effectiveCallback;
     } else if (role === "admin") {
-      router.push("/admin");
+      window.location.href = "/admin";
     } else if (role === "department") {
-      router.push("/department");
+      window.location.href = "/department";
     } else {
-      router.push("/student");
+      window.location.href = "/student";
     }
   };
 
@@ -61,8 +61,8 @@ function LoginForm() {
     try {
       const effectiveCallback =
         !rawCallbackUrl ||
-        rawCallbackUrl === "/" ||
-        rawCallbackUrl === window.location.origin
+          rawCallbackUrl === "/" ||
+          rawCallbackUrl === window.location.origin
           ? "/post-auth"
           : rawCallbackUrl;
 
@@ -181,21 +181,21 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute inset-0 grid-bg opacity-40" />
       <div className="grid min-h-screen place-items-center pt-24 pb-12">
 
-      <div className="relative z-10 w-full max-w-xl space-y-8 rounded-3xl border border-border bg-card/70 p-8 shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur md:p-10">
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Welcome back</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Sign in</h1>
-          <p className="text-sm text-muted-foreground">
-            Only valid MES accounts can log in. Students use{" "}
-            <span className="font-medium text-foreground">@student.mes.ac.in</span>; faculty and admins use{" "}
-            <span className="font-medium text-foreground">@mes.ac.in</span>.
-          </p>
-        </div>
+        <div className="relative z-10 w-full max-w-xl space-y-8 rounded-3xl border border-border bg-card/70 p-8 shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)] backdrop-blur md:p-10">
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Welcome back</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Sign in</h1>
+            <p className="text-sm text-muted-foreground">
+              Only valid MES accounts can log in. Students use{" "}
+              <span className="font-medium text-foreground">@student.mes.ac.in</span>; faculty and admins use{" "}
+              <span className="font-medium text-foreground">@mes.ac.in</span>.
+            </p>
+          </div>
 
-        <Suspense fallback={<div className="py-8 text-center text-sm text-muted-foreground">Loading...</div>}>
-          <LoginForm />
-        </Suspense>
-      </div>
+          <Suspense fallback={<div className="py-8 text-center text-sm text-muted-foreground">Loading...</div>}>
+            <LoginForm />
+          </Suspense>
+        </div>
       </div>
     </main>
   );
