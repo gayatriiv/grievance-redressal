@@ -6,6 +6,9 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { resolveOrganizationUser } from "@/lib/org";
 
+const isMongoObjectId = (value: unknown): value is string =>
+  typeof value === "string" && /^[a-fA-F0-9]{24}$/.test(value);
+
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
@@ -111,10 +114,27 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (user) {
-        (token as any).id = (user as any).id ?? (token as any).id;
+        const incomingId = (user as any).id;
+        if (isMongoObjectId(incomingId)) {
+          (token as any).id = incomingId;
+        }
         (token as any).role = (user as any).role ?? (token as any).role;
         (token as any).department = (user as any).department ?? (token as any).department;
         (token as any).rollNumber = (user as any).rollNumber ?? (token as any).rollNumber;
+      }
+
+      // Last guard: when token id is not a Mongo ObjectId, rehydrate from DB by email.
+      if (!isMongoObjectId((token as any).id)) {
+        const email = (user?.email ?? (token.email as string | undefined))?.trim().toLowerCase();
+        if (email) {
+          const dbUser = await prisma.user.findUnique({ where: { email } });
+          if (dbUser) {
+            (token as any).id = dbUser.id;
+            (token as any).role = dbUser.role;
+            (token as any).department = dbUser.department;
+            (token as any).rollNumber = dbUser.rollNumber;
+          }
+        }
       }
 
       return token;

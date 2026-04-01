@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+const isMongoObjectId = (value: unknown): value is string =>
+  typeof value === "string" && /^[a-fA-F0-9]{24}$/.test(value);
+
 export type AppSessionUser = {
   id: string;
   email: string;
@@ -20,7 +23,7 @@ export const getSessionUser = async (): Promise<AppSessionUser | null> => {
     return null;
   }
 
-  if (!user.id || !user.role) {
+  if (!user.id || !user.role || !isMongoObjectId(user.id)) {
     const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
     if (!dbUser) return null;
     return {
