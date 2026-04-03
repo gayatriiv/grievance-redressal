@@ -174,4 +174,4 @@ const styles = {
   justifyContent: "space-between",
   marginBottom: "40px",
 },
-};
+}as const;
