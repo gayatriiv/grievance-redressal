@@ -59,5 +59,25 @@ export const Footer = () => (
         <p className="text-xs text-muted-foreground">AI Based Grievance Redressal System</p>
       </div>
     </div>
-  </footer>
+    <div className="mt-6 text-center">
+  <p className="text-sm">
+    Developed as part of learning at{" "}
+    <a 
+      href="https://www.pce.ac.in"
+      target="_blank"
+      className="text-blue-500 underline"
+    >
+      Pillai College of Engineering
+    </a>
+  </p>
+
+  <a
+    href="https://github.com/gayatriiv/grievance-redressal/graphs/contributors"
+    target="_blank"
+    className="text-blue-500 underline text-sm"
+  >
+    View Contributors
+  </a>
+</div>
+</footer>
 );
