@@ -72,7 +72,7 @@ export const Footer = () => (
   </p>
 
   <a
-    href="https://github.com/gayatriiv/grievance-redressal/graphs/contributors"
+    href="/contributors"
     target="_blank"
     className="text-blue-500 underline text-sm"
   >
