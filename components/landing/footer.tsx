@@ -63,21 +63,21 @@ export const Footer = () => (
   <p className="text-sm">
     Developed as part of learning at{" "}
     <a 
-      href="https://www.pce.ac.in"
-      target="_blank"
-      className="text-blue-500 underline"
-    >
+  href="https://www.pce.ac.in"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-blue-500 underline"
+>
       Pillai College of Engineering
     </a>
   </p>
 
-  <a
-    href="/contributors"
-    target="_blank"
-    className="text-blue-500 underline text-sm"
-  >
-    View Contributors
-  </a>
+ <Link
+  href="/contributors"
+  className="text-blue-500 underline text-sm"
+>
+  View Contributors
+</Link>
 </div>
 </footer>
 );
