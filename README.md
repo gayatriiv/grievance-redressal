@@ -108,39 +108,41 @@ admin_emails=<comma-separated-admin-emails>
 
 ## demo video
 
-youtube link here
+demo : www. youtube.com
 
 ---
 
-## team members
+## Team Members
 
-- arnav deka - roll no.12
-- aditi garud — roll no. 13
-- ajay gaur - roll no. 14
-- tanmay gawade - roll no. 15
-- gayatri vinod - roll no. 16
-- parth ghadge - roll no. 17
-- ranjith iyer - roll no. 18
-- om jathar — roll no. 19
-- shravani jedhe — roll no. 20
-- shriya jedhe — roll no. 21
-- rishikesh kanikudiyil - roll no. 22
-
----
+| Roll No. | Name                  |
+|----------|-----------------------|
+| 12       | Arnav Deka            |
+| 13       | Aditi Garud           |
+| 14       | Ajay Gaur             |
+| 15       | Tanmay Gawade         |
+| 16       | Gayatri Vinod         |
+| 17       | Parth Ghadge          |
+| 18       | Ranjith Iyer          |
+| 19       | Om Jathar             |
+| 20       | Shravani Jedhe        |
+| 21       | Shriya Jedhe          |
+| 22       | Rishikesh Kanikudiyil |
 
 ## github contributions
 
-- arnav deka -
-- aditi garud –
-- ajay gaur -
-- tanmay gawade -
-- gayatri vinod -
-- om jathar – 
-- shravani jedhe – 
-- shriya jedhe –
-- rishikesh kanikudiyil - 
-- parth ghadge -
----
+| Member Name              | Contributions |
+|--------------------------|--------------|
+| Arnav Deka              | Improved platform functionality by adding user management, authentication enhancements, and grievance form features, while streamlining UI consistency and code quality. |
+| Aditi Garud             | Added a feedback and rating system allowing students to evaluate the resolution process and share service quality insights after complaints are resolved. |
+| Ajay Gaur               | Implemented analytics to identify recurring complaint patterns from historical data, enabling actionable insights for continuous institutional improvement. |
+| Tanmay Gawade           | Enhanced the UI/UX with glassmorphism effects, smooth scrolling, and an animated theme toggle, along with improved authentication error handling for better debugging and reliability. |
+| Gayatri Vinod           | Developed an AI-powered complaint assistant, added file upload support in forms, and improved dashboard layout and spacing. |
+| Parth Ghadge            | Resolved bugs and improved overall platform stability and reliability in the admin dashboard. |
+| Om Jathar               | Implemented an automated complaint escalation mechanism that routes unresolved cases to higher authorities within a defined timeframe, improving accountability and response efficiency. |
+| Ranjith Iyer            | Implemented automatic complaint prioritization using keyword and context analysis to classify issues by urgency (Low to Critical). |
+| Shriya Jedhe            | Resolved bugs and improved overall platform stability and reliability in the student dashboard. |
+| Shravani Jedhe          | Fixed duplicate complaint detection to improve accuracy and reduce redundant submissions. |
+| Rishikesh Kanikudiyil   | Enabled anonymous complaint submission so students can report sensitive issues more safely and confidently. |
 
 ## references
 
