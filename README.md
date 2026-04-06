@@ -108,7 +108,7 @@ admin_emails=<comma-separated-admin-emails>
 
 ## demo video
 
-demo : www. youtube.com
+- [Youtube](https://youtu.be/X8UBgAFcbUE?si=6EoF674cawjksKr8)
 
 ---
 
